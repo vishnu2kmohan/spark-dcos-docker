@@ -6,9 +6,11 @@ dependencies:
 - bokeh
 - dask
 - distributed
+- findspark
 - ipython
 - libhdfs3
 - pyarrow
+- pyspark=2.2.1=py36_0
 - s3fs
 - tensorflow=1.5.0=py36_0
 - xgboost

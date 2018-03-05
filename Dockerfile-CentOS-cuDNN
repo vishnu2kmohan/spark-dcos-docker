@@ -155,7 +155,6 @@ RUN cd /tmp \
     && $CONDA_DIR/bin/conda config --system --set show_channel_urls true \
     && $CONDA_DIR/bin/conda update --json --all -yq \
     && $CONDA_DIR/bin/conda env update --json -q -f "${CONDA_DIR}/spark-root-conda-cudnn-env.yml" \
-    && $CONDA_DIR/bin/conda update --json --all -yq \
     && $CONDA_DIR/bin/conda clean --json -tipsy \
     && rm -rf /root/.cache/pip/* \
     && rm -rf /tmp/* \

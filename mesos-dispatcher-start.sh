@@ -62,12 +62,12 @@ export APPLICATION_WEB_PROXY_BASE="${DISPATCHER_UI_WEB_PROXY_BASE}"
 set_log_level
 export_daemon_opts
 configure_properties
-ZK=${ZK:-"zk://zk-1.zk:2181,zk-2.zk:2181,zk-3.zk:2181,zk-4.zk:2181,zk-5.zk:2181"}
+ZK=${ZK:-"zk-1.zk:2181,zk-2.zk:2181,zk-3.zk:2181,zk-4.zk:2181,zk-5.zk:2181"}
 
 exec "${SPARK_DIST_PATH}/bin/spark-class" \
     org.apache.spark.deploy.mesos.MesosClusterDispatcher \
-    --port "${DISPATCHER_PORT}" \
-    --webui-port "${DISPATCHER_UI_PORT}" \
+    --port "${PORT_DISPATCHER}" \
+    --webui-port "${PORT_UI}" \
     --master "mesos://zk://${ZK}/mesos" \
     --zk "${ZK}" \
     --host "${HOST}" \

@@ -1,19 +1,13 @@
-# debian:9.3 - linux; amd64
-# https://github.com/docker-library/repo-info/blob/master/repos/debian/tag-details.md#debian93---linux-amd64
-FROM debian@sha256:02741df16aee1b81c4aaff4c48d75cc2c308bade918b22679df570c170feef7c
+FROM centos:7.4.1708
 
 LABEL maintainer="Vishnu Mohan <vishnu@mesosphere.com>"
 
-ARG CODENAME="stretch"
 ARG CONDA_DIR="/opt/conda"
 ARG CONDA_INSTALLER="Miniconda3-4.3.31-Linux-x86_64.sh"
 ARG CONDA_MD5="7fe70b214bee1143e3e3f0467b71453c"
 ARG CONDA_URL="https://repo.continuum.io/miniconda"
 ARG DCOS_COMMONS_URL="https://downloads.mesosphere.com/dcos-commons"
 ARG DCOS_COMMONS_VERSION="0.40.3"
-ARG DISTRO="debian"
-ENV DEBCONF_NONINTERACTIVE_SEEN="true"
-ARG DEBIAN_FRONTEND="noninteractive"
 ARG GPG_KEYSERVER="hkps://pgp.mit.edu"
 ARG HADOOP_VERSION="2.7"
 ARG JAVA_HOME="/opt/jdk"
@@ -28,14 +22,16 @@ ARG MESOS_MAVEN_URL="https://repository.apache.org/service/local/repositories/re
 ARG MESOS_PROTOBUF_JAR_SHA1="189ef74959049521be8f5a1c3de3921eb0117ffb"
 ARG MESOS_SANDBOX="/mnt/mesos/sandbox"
 ARG MESOS_VERSION="1.5.0"
+ARG NVIDIA_GPGKEY_SUM=d1be581509378368edeec8c1eb2958702feedf3bc3d17011adbf24efacce4ab5
 ARG NVIDIA_CUDA_MAJOR_VERSION="9-0"
 ARG NVIDIA_CUDA_PKG_VERSION="9.0.176-1"
 ARG NVIDIA_CUDA_VERSION="9.0"
 ARG NVIDIA_CUDA_TOOLS_GPG_KEY="7fa2af80"
 ARG NVIDIA_CUDNN_MAJOR_VERSION="7"
+ARG NVIDIA_CUDNN_VERSION="7.1.1.5"
 ARG NVIDIA_CUDNN_PKG_VERSION="7.1.1.5-1+cuda9.0"
-ARG NVIDIA_DISTRO="ubuntu1604"
-ARG NVIDIA_NCCL_VERSION="2.1.2-1+cuda9.0"
+ARG NVIDIA_CUDNN_SUM=""d2038dca6e6070aa6879d827fa6c032c942514a6b9bddf5ade275670ca474b9c
+ARG NVIDIA_DISTRO="rhel7"
 ARG NVIDIA_URL="http://developer.download.nvidia.com/compute"
 ARG REPO="http://cdn-fastly.deb.debian.org"
 ARG SPARK_DIST_URL="https://downloads.mesosphere.com/spark"
@@ -46,8 +42,6 @@ ARG VERSION
 
 ENV CODENAME=${CODENAME:-"stretch"} \
     CONDA_DIR=${CONDA_DIR:-"/opt/conda"} \
-    DEBCONF_NONINTERACTIVE_SEEN=${DEBCONF_NONINTERACTIVE_SEEN:-"true"} \
-    DEBIAN_FRONTEND=${DEBIAN_FRONTEND:-"noninteractive"} \
     DISTRO=${DISTRO:-"debian"} \
     GPG_KEYSERVER=${GPG_KEYSERVER:-"hkps://pgp.mit.edu"} \
     JAVA_HOME=${JAVA_HOME:-"/opt/jdk"} \
@@ -71,34 +65,37 @@ ENV CODENAME=${CODENAME:-"stretch"} \
     SHELL="/bin/bash" \
     SPARK_HOME=${SPARK_HOME:-"/opt/spark"}
 
-RUN echo "deb ${REPO}/${DISTRO} ${CODENAME} main" \
-         >> /etc/apt/sources.list \
-    echo "deb ${REPO}/${DISTRO}-security ${CODENAME}/updates main" \
-         >> /etc/apt/sources.list \
-    && apt-get update -yq --fix-missing \
-    && apt-get install -yq --no-install-recommends locales \
-    && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
-    && locale-gen \
-    && apt-get install -yq --no-install-recommends apt-utils \
-    && apt-get -yq dist-upgrade \
-    && apt-get install -yq --no-install-recommends \
+# Use OSL for repos
+RUN rpm -Uvh http://epel.osuosl.org/7/x86_64/Packages/e/epel-release-7-11.noarch.rpm \
+    && sed -i -e 's/^\(mirrorlist.*\)/#\1/g' /etc/yum.repos.d/epel.repo \
+    && sed -i -e 's/^#baseurl=.*pub\/epel\/7\/$basearch$/baseurl=http:\/\/epel.osuosl.org\/7\/$basearch\//' /etc/yum.repos.d/epel.repo \
+    && yum install yum install --assumeyes --tolerant --quiet epel-release \
+    && sed -i -e 's/^\(mirrorlist.*\)/#\1/g' /etc/yum.repos.d/CentOS-Base.repo \
+    && sed -i -e 's/^#baseurl=.*$releasever\/os\/$basearch\//baseurl=http\:\/\/centos.osuosl.org\/$releasever\/os\/$basearch\//g' /etc/yum.repos.d/CentOS-Base.repo \
+    && sed -i -e 's/^#baseurl=.*$releasever\/updates\/$basearch\//baseurl=http\:\/\/centos.osuosl.org\/$releasever\/updates\/$basearch\//g' /etc/yum.repos.d/CentOS-Base.repo \
+    && sed -i -e 's/^#baseurl=.*$releasever\/addons\/$basearch\//baseurl=http\:\/\/centos.osuosl.org\/$releasever\/addons\/$basearch\//g' /etc/yum.repos.d/CentOS-Base.repo \
+    && sed -i -e 's/^#baseurl=.*$releasever\/extras\/$basearch\//baseurl=http\:\/\/centos.osuosl.org\/$releasever\/extras\/$basearch\//g' /etc/yum.repos.d/CentOS-Base.repo \
+    && sed -i -e 's/^#baseurl=.*$releasever\/centosplus\/$basearch\//baseurl=http\:\/\/centos.osuosl.org\/$releasever\/centosplus\/$basearch\//g' /etc/yum.repos.d/CentOS-Base.repo \
+    && sed -i -e 's/^#baseurl=.*$releasever\/contrib\/$basearch\//baseurl=http\:\/\/centos.osuosl.org\/$releasever\/contrib\/$basearch\//g' /etc/yum.repos.d/CentOS-Base.repo \
+    && yum upgrade --assumeyes --tolerant --quiet \
+    && yum install --assumeyes --tolerant --quiet \
        bash-completion \
        bzip2 \
        ca-certificates \
        curl \
+       deltarpm \
        dirmngr \
        git \
        gnupg \
        jq \
-       openssh-client \
+       openssh-clients \
        procps \
        rsync \
        sudo \
        unzip \
        vim \
        wget \
-    && apt-get clean \
-    && rm -rf /var/apt/lists/*
+    && yum clean all
 
 LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.name="Apache Spark" \
@@ -109,26 +106,27 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="2.2.1-1.10.5" \
       com.nvidia.volumes.needed="nvidia_driver" \
-      com.nvidia.cuda.version="${NVIDIA_CUDA_PKG_VERSION}" \
+      com.nvidia.cuda.version="${CUDA_VERSION}" \
       com.nvidia.cudnn.version="${NVIDIA_CUDNN_VERSION}"
 
 COPY spark-root-conda-cudnn-env.yml "${CONDA_DIR}/"
+COPY cuda.repo /etc/yum.repos.d/cuda.repo
 
-RUN apt-key adv --keyserver "$GPG_KEYSERVER" --recv-keys "$NVIDIA_CUDA_TOOLS_GPG_KEY" \
-    && echo "deb $NVIDIA_URL/cuda/repos/${NVIDIA_DISTRO}/x86_64 /" > /etc/apt/sources.list.d/nvidia-cuda.list \
-    && echo "deb $NVIDIA_URL/machine-learning/repos/${NVIDIA_DISTRO}/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list \
-    && apt-get update -yq --fix-missing \
-    && apt-get install -yq --no-install-recommends \
-       "cuda-cudart-${NVIDIA_CUDA_MAJOR_VERSION}=${NVIDIA_CUDA_PKG_VERSION}" \
-       "cuda-libraries-${NVIDIA_CUDA_MAJOR_VERSION}=${NVIDIA_CUDA_PKG_VERSION}" \
-       "cuda-libraries-dev-${NVIDIA_CUDA_MAJOR_VERSION}=${NVIDIA_CUDA_PKG_VERSION}" \
-       "libnccl2=${NVIDIA_NCCL_VERSION}" \
-       "libcudnn7=${NVIDIA_CUDNN_PKG_VERSION}" \
+RUN cd /tmp \
+    && curl --retry 3 -fsSL "${NVIDIA_URL}/cuda/repos/${NVIDIA_DISTRO}/x86_64/${NVIDIA_CUDA_TOOLS_GPG_KEY}.pub" | sed '/^Version/d' > /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA \
+    && echo "$NVIDIA_GPGKEY_SUM  /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA" | sha256sum -c --strict - \
+    && yum install --assumeyes --tolerant --quiet \
+       "cuda-cudart-${NVIDIA_CUDA_MAJOR_VERSION}-${NVIDIA_CUDA_PKG_VERSION}" \
+       "cuda-libraries-${NVIDIA_CUDA_MAJOR_VERSION}-${NVIDIA_CUDA_PKG_VERSION}" \
+       "cuda-libraries-dev-${NVIDIA_CUDA_MAJOR_VERSION}-${NVIDIA_CUDA_PKG_VERSION}" \
+    && yum clean all \
     && ln -s /usr/local/cuda-9.0 /usr/local/cuda \
     && ln -s /usr/local/cuda-9.0/targets/x86_64-linux/lib/stubs/libcuda.so /usr/local/cuda-9.0/targets/x86_64-linux/lib/libcuda.so.1 \
-    && apt-get clean \
-    && rm -rf /var/apt/lists/* \
-    && cd /tmp \
+    && curl --retry 3 -fsSL "${NVIDIA_URL}/redist/cudnn/v7.1.1/cudnn-9.0-linux-x64-v7.1.tgz" -O \
+    && echo "${NVIDIA_CUDNN_SUM}  cudnn-9.0-linux-x64-v7.1.tgz" | sha256sum -c - \
+    && tar --no-same-owner -xzf cudnn-9.0-linux-x64-v7.1.tgz -C /usr/local --wildcards 'cuda/lib64/libcudnn.so.*' \
+    && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
+    && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf \
     && mkdir -p "${CONDA_DIR}" "${JAVA_HOME}" "${SPARK_HOME}" \
     && mkdir -p "${MESOSPHERE_PREFIX}" "${MESOSPHERE_PREFIX}/bin" \
     && curl --retry 3 -fsSL -O "${LIBMESOS_BUNDLE_URL}/libmesos-bundle-${LIBMESOS_BUNDLE_VERSION}.tar.gz" \
@@ -159,6 +157,7 @@ RUN apt-key adv --keyserver "$GPG_KEYSERVER" --recv-keys "$NVIDIA_CUDA_TOOLS_GPG
     && $CONDA_DIR/bin/conda env update --json -q -f "${CONDA_DIR}/spark-root-conda-cudnn-env.yml" \
     && $CONDA_DIR/bin/conda update --json --all -yq \
     && $CONDA_DIR/bin/conda clean --json -tipsy \
+    && rm -rf /root/.cache/pip/* \
     && rm -rf /tmp/* \
     && ldconfig
 

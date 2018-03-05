@@ -1,0 +1,13 @@
+name: root
+channels:
+- conda-forge
+dependencies:
+- awscli
+- bokeh
+- dask
+- distributed
+- libhdfs3
+- pyarrow
+- s3fs
+- tensorflow
+- xgboost

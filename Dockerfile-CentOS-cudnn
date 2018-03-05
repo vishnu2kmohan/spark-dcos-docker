@@ -109,7 +109,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       com.nvidia.cuda.version="${CUDA_VERSION}" \
       com.nvidia.cudnn.version="${NVIDIA_CUDNN_VERSION}"
 
-COPY spark-root-conda-env.yml "${CONDA_DIR}/"
+COPY spark-root-conda-cudnn-env.yml "${CONDA_DIR}/"
 COPY cuda.repo /etc/yum.repos.d/cuda.repo
 
 RUN cd /tmp \
@@ -117,11 +117,14 @@ RUN cd /tmp \
     && echo "$NVIDIA_GPGKEY_SUM  /etc/pki/rpm-gpg/RPM-GPG-KEY-NVIDIA" | sha256sum -c --strict - \
     && yum install --assumeyes --tolerant --quiet \
        "cuda-cudart-${NVIDIA_CUDA_MAJOR_VERSION}-${NVIDIA_CUDA_PKG_VERSION}" \
-       "cuda-libraries--${NVIDIA_CUDA_MAJOR_VERSION}-${NVIDIA_CUDA_PKG_VERSION}" \
+       "cuda-libraries-${NVIDIA_CUDA_MAJOR_VERSION}-${NVIDIA_CUDA_PKG_VERSION}" \
+       "cuda-libraries-dev-${NVIDIA_CUDA_MAJOR_VERSION}-${NVIDIA_CUDA_PKG_VERSION}" \
+    && yum clean all \
+    && ln -s /usr/local/cuda-9.0 /usr/local/cuda \
+    && ln -s /usr/local/cuda-9.0/targets/x86_64-linux/lib/stubs/libcuda.so /usr/local/cuda-9.0/targets/x86_64-linux/lib/libcuda.so.1 \
     && curl --retry 3 -fsSL "${NVIDIA_URL}/redist/cudnn/v7.1.1/cudnn-9.0-linux-x64-v7.1.tgz" -O \
     && echo "${NVIDIA_CUDNN_SUM}  cudnn-9.0-linux-x64-v7.1.tgz" | sha256sum -c - \
     && tar --no-same-owner -xzf cudnn-9.0-linux-x64-v7.1.tgz -C /usr/local --wildcards 'cuda/lib64/libcudnn.so.*' \
-    && ln -s cuda-9.0 /usr/local/cuda \
     && echo "/usr/local/nvidia/lib" >> /etc/ld.so.conf.d/nvidia.conf \
     && echo "/usr/local/nvidia/lib64" >> /etc/ld.so.conf.d/nvidia.conf \
     && mkdir -p "${CONDA_DIR}" "${JAVA_HOME}" "${SPARK_HOME}" \
@@ -151,7 +154,7 @@ RUN cd /tmp \
     && $CONDA_DIR/bin/conda config --system --set auto_update_conda false \
     && $CONDA_DIR/bin/conda config --system --set show_channel_urls true \
     && $CONDA_DIR/bin/conda update --json --all -yq \
-    && $CONDA_DIR/bin/conda env update --json -q -f "${CONDA_DIR}/spark-root-conda-env.yml" \
+    && $CONDA_DIR/bin/conda env update --json -q -f "${CONDA_DIR}/spark-root-conda-cudnn-env.yml" \
     && $CONDA_DIR/bin/conda update --json --all -yq \
     && $CONDA_DIR/bin/conda clean --json -tipsy \
     && rm -rf /tmp/* \

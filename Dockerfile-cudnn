@@ -112,7 +112,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       com.nvidia.cuda.version="${NVIDIA_CUDA_PKG_VERSION}" \
       com.nvidia.cudnn.version="${NVIDIA_CUDNN_VERSION}"
 
-COPY spark-root-conda-env.yml "${CONDA_DIR}/"
+COPY spark-root-conda-cudnn-env.yml "${CONDA_DIR}/"
 
 RUN apt-key adv --keyserver "$GPG_KEYSERVER" --recv-keys "$NVIDIA_CUDA_TOOLS_GPG_KEY" \
     && echo "deb $NVIDIA_URL/cuda/repos/${NVIDIA_DISTRO}/x86_64 /" > /etc/apt/sources.list.d/nvidia-cuda.list \
@@ -121,9 +121,11 @@ RUN apt-key adv --keyserver "$GPG_KEYSERVER" --recv-keys "$NVIDIA_CUDA_TOOLS_GPG
     && apt-get install -yq --no-install-recommends \
        "cuda-cudart-${NVIDIA_CUDA_MAJOR_VERSION}=${NVIDIA_CUDA_PKG_VERSION}" \
        "cuda-libraries-${NVIDIA_CUDA_MAJOR_VERSION}=${NVIDIA_CUDA_PKG_VERSION}" \
+       "cuda-libraries-dev-${NVIDIA_CUDA_MAJOR_VERSION}=${NVIDIA_CUDA_PKG_VERSION}" \
        "libnccl2=${NVIDIA_NCCL_VERSION}" \
        "libcudnn7=${NVIDIA_CUDNN_PKG_VERSION}" \
-    && ln -s cuda-9.0 /usr/local/cuda \
+    && ln -s /usr/local/cuda-9.0 /usr/local/cuda \
+    && ln -s /usr/local/cuda-9.0/targets/x86_64-linux/lib/stubs/libcuda.so /usr/local/cuda-9.0/targets/x86_64-linux/lib/libcuda.so.1 \
     && apt-get clean \
     && rm -rf /var/apt/lists/* \
     && cd /tmp \
@@ -154,7 +156,7 @@ RUN apt-key adv --keyserver "$GPG_KEYSERVER" --recv-keys "$NVIDIA_CUDA_TOOLS_GPG
     && $CONDA_DIR/bin/conda config --system --set auto_update_conda false \
     && $CONDA_DIR/bin/conda config --system --set show_channel_urls true \
     && $CONDA_DIR/bin/conda update --json --all -yq \
-    && $CONDA_DIR/bin/conda env update --json -q -f "${CONDA_DIR}/spark-root-conda-env.yml" \
+    && $CONDA_DIR/bin/conda env update --json -q -f "${CONDA_DIR}/spark-root-conda-cudnn-env.yml" \
     && $CONDA_DIR/bin/conda update --json --all -yq \
     && $CONDA_DIR/bin/conda clean --json -tipsy \
     && rm -rf /tmp/* \

@@ -40,11 +40,11 @@ if [ -d "${MESOS_SANDBOX}" ] ; then
     # this should be LIBPROCESS_IP iff the driver is on the host network, $(hostname) when it's not (e.g. CNI).
     if [ -z "${SKIP_BOOTSTRAP_IP_DETECT}" ]; then
         if [ -f "${BOOTSTRAP}" ]; then
-            echo "Using bootstrap to set SPARK_LOCAL_IP" >&2
+            echo "spark-env: Using bootstrap to set SPARK_LOCAL_IP" >&2
             SPARK_LOCAL_IP=$($BOOTSTRAP --get-task-ip)
-            echo "SPARK_LOCAL_IP = ${SPARK_LOCAL_IP}" >&2
+            echo "spark-env: bootstrap set SPARK_LOCAL_IP=${SPARK_LOCAL_IP}" >&2
         else
-            echo "ERROR: Unable to find bootstrap here: ${BOOTSTRAP}, exiting." >&2
+            echo "spark-env: ERROR: Unable to find bootstrap at: ${BOOTSTRAP}, exiting." >&2
             exit 1
         fi
     else
@@ -54,7 +54,7 @@ if [ -d "${MESOS_SANDBOX}" ] ; then
     echo "spark-env: User: $(whoami)" >&2
 
     if [ -n "${SPARK_SECURITY_KERBEROS_KDC_HOSTNAME}" ] && [ -n "${SPARK_SECURITY_KERBEROS_KDC_PORT}" ] && [ -n "${SPARK_SECURITY_KERBEROS_REALM}" ]; then
-        echo "Templating krb5.conf from environment" >&2
+        echo "spark-env: Templating krb5.conf from environment" >&2
         # working dir is /mnt/mesos/sandbox
         CONFIG_TEMPLATE_KRB5CONF=../../../etc/krb5.conf.mustache,/mnt/mesos/sandbox/krb5.conf $BOOTSTRAP -template -resolve=false --print-env=false -install-certs=false
         cat /mnt/mesos/sandbox/krb5.conf
@@ -69,13 +69,13 @@ if [ -d "${MESOS_SANDBOX}" ] ; then
     fi
 
     if [[ -n "${KRB5CONF}" ]]; then
-        echo "Decoding base64 encoded krb5.conf" >&2
+        echo "spark-env: Decoding base64 encoded krb5.conf" >&2
         if base64 --help | grep -q GNU; then
               BASE64_D="base64 -d" # GNU
           else
               BASE64_D="base64 -D" # BSD
         fi
-        echo "spark-env: Copying krb config from $KRB5CONF to /etc/" >&2
+        echo "spark-env: Copying krb config from $KRB5CONF to $MESOS_SANDBOX" >&2
         echo "${KRB5CONF}" | ${BASE64_D} > "${MESOS_SANDBOX}/krb5.conf"
     else
         echo "spark-env: No SPARK_MESOS_KRB5_CONF_BASE64 decoded" >&2

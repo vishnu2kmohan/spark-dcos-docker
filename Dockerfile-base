@@ -104,9 +104,6 @@ RUN echo "deb ${REPO}/${DISTRO} ${CODENAME} main" \
     && usermod -g nobody nobody \
     && echo nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin >> /etc/passwd
 
-COPY conf/ "${SPARK_HOME}/conf/"
-COPY spark-root-conda-base-env.yml "${CONDA_DIR}/"
-
 RUN cd /tmp \
     && mkdir -p "${JAVA_HOME}" "${SPARK_HOME}" \
     && mkdir -p "${MESOSPHERE_PREFIX}" "${MESOSPHERE_PREFIX}/bin" \
@@ -127,24 +124,25 @@ RUN cd /tmp \
     && tar xf "server-jre-${JAVA_VERSION}-linux-x64.tar.gz" -C "${JAVA_HOME}" --strip-components=1 \
     && curl --retry 3 -fsSL -O "${SPARK_DIST_URL}/assets/spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}.tgz" \
     && tar xf "spark-${SPARK_VERSION}-bin-${HADOOP_VERSION}.tgz" -C "${SPARK_HOME}" --strip-components=1 \
-    && chmod -R ugo+rw "${SPARK_HOME}/conf" \
-    && curl --retry 3 -fsSL -O "$CONDA_URL/$CONDA_INSTALLER" \
-    && echo "$CONDA_MD5  $CONDA_INSTALLER" | md5sum -c - \
+    && rm -rf /tmp/*
+
+COPY spark-root-conda-base-env.yml "${CONDA_DIR}/"
+
+RUN curl --retry 3 -fsSL -O "$CONDA_URL/$CONDA_INSTALLER" \
+    && echo "${CONDA_MD5}  ${CONDA_INSTALLER}" | md5sum -c - \
     && bash "./$CONDA_INSTALLER" -u -b -p "$CONDA_DIR" \
     && $CONDA_DIR/bin/conda config --system --prepend channels conda-forge \
     && $CONDA_DIR/bin/conda config --system --set auto_update_conda false \
     && $CONDA_DIR/bin/conda config --system --set show_channel_urls true \
     && $CONDA_DIR/bin/conda update --json --all -yq \
     && $CONDA_DIR/bin/conda env update --json -q -f "${CONDA_DIR}/spark-root-conda-base-env.yml" \
-    && $CONDA_DIR/bin/conda clean --json -tipsy \
-    && rm -rf /tmp/* \
-    && ldconfig
+    && $CONDA_DIR/bin/conda clean --json -tipsy
 
-ENV LD_LIBRARY_PATH /opt/mesosphere/libmesos-bundle/lib/
 COPY runit/service /var/lib/runit/service
 COPY runit/init.sh /sbin/init.sh
 COPY nginx /etc/nginx
 COPY krb5.conf.mustache /etc/
+COPY conf/ "${SPARK_HOME}/conf/"
 
 RUN mkdir -p /var/lib/nginx \
     && ln -s /var/lib/runit/service/spark /etc/service/spark \
@@ -154,6 +152,9 @@ RUN mkdir -p /var/lib/nginx \
     && chmod -R ugo+rw /etc/nginx \
     && chmod -R ugo+rw /var/lib/nginx \
     && chmod -R ugo+rw /var/log/nginx \
-    && chmod -R ugo+rw /var/run
+    && chmod -R ugo+rw /var/run \
+    && chmod -R ugo+rw "${SPARK_HOME}/conf" \
+    && ldconfig
 
+ENV LD_LIBRARY_PATH="${MESOSPHERE_PREFIX}/libmesos-bundle/lib"
 WORKDIR "${SPARK_HOME}"

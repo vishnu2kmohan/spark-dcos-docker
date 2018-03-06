@@ -29,9 +29,7 @@
     "SPARK_DISPATCHER_MESOS_SECRET": "",
     "SPARK_HDFS_CONFIG_URL": "",
     "SPARK_LOG_LEVEL": "INFO",
-    "SPARK_USER": "nobody",
-    "SPARK_WORKER_CORES": "2",
-    "SPARK_WORKER_MEMORY": "3072"
+    "SPARK_USER": "nobody"
   },
   "secrets": {                                                                  
     "serviceCredential": {                                                      

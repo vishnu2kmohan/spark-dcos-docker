@@ -7,7 +7,7 @@
     "service_account": "dev_spark_dispatcher",
     "service_account_secret": "dev/spark/dispatcher/serviceCredential",
     "user": "nobody",
-    "docker-image": "vishnumohan/spark:latest-centos-cudnn",
+    "docker-image": "vishnumohan/spark-dcos:latest-base",
     "log-level": "INFO",
     "spark-history-server-url": "https://<DCOS_URL>/service/dev/spark/history"
   }

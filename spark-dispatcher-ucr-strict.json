@@ -8,7 +8,7 @@
     "type": "MESOS",
     "docker": {
       "forcePullImage": true,
-      "image": "vishnumohan/spark:latest-base"
+      "image": "vishnumohan/spark-dcos:latest-base"
     }
   },
   "env": {

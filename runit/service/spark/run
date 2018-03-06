@@ -8,6 +8,7 @@ SPARK_DIST_PATH=${SPARK_HOME:-"/opt/spark"}
 
 function export_daemon_opts() {
     export SPARK_DAEMON_JAVA_OPTS=${SPARK_DAEMON_JAVA_OPTS:-""}
+
     if [ "${DCOS_SERVICE_NAME}" != "spark" ]; then
         local ZK_SUFFIX=${DCOS_SERVICE_NAME////__}
         export SPARK_DAEMON_JAVA_OPTS="${SPARK_DAEMON_JAVA_OPTS} -Dspark.deploy.zookeeper.dir=/spark_mesos_dispatcher${ZK_SUFFIX}"

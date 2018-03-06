@@ -40,11 +40,12 @@ LABEL maintainer="Vishnu Mohan <vishnu@mesosphere.com>" \
       org.label-schema.description="Apache Spark is a fast and general engine for large-scale data processing" \
       org.label-schema.url="http://spark.apache.org" \
       org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url="https://github.com/vishnu2kmohan/spark" \
+      org.label-schema.vcs-url="https://github.com/vishnu2kmohan/spark-dcos" \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="2.2.1-1.10.5"
 
-ENV CODENAME=${CODENAME:-"stretch"} \
+ENV BOOTSTRAP="${MESOSPHERE_PREFIX}/bin/bootstrap" \
+    CODENAME=${CODENAME:-"stretch"} \
     CONDA_DIR=${CONDA_DIR:-"/opt/conda"} \
     DEBCONF_NONINTERACTIVE_SEEN=${DEBCONF_NONINTERACTIVE_SEEN:-"true"} \
     DEBIAN_FRONTEND=${DEBIAN_FRONTEND:-"noninteractive"} \

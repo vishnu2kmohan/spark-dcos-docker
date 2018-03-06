@@ -22,6 +22,7 @@
 
 if [ -d "${MESOS_SANDBOX}" ] ; then
     cd "${MESOS_SANDBOX}" || exit
+    MESOSPHERE_PREFIX=${MESOSPHERE_PREFIX:-"/opt/mesosphere"}
     export BOOTSTRAP=${MESOSPHERE_PREFIX}/bin/bootstrap
     export HADOOP_CONF_DIR=${MESOS_SANDBOX}
     export HIVE_CONF_DIR=${MESOS_SANDBOX}

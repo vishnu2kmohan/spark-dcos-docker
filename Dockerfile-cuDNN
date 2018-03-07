@@ -18,9 +18,8 @@ LABEL com.nvidia.volumes.needed="nvidia_driver" \
       com.nvidia.cuda.version="${NVIDIA_CUDA_PKG_VERSION}" \
       com.nvidia.cudnn.version="${NVIDIA_CUDNN_VERSION}"
 
-RUN rm /etc/ld.so.conf.d/libmesos.conf \
-    && unset LD_LIBRARY_PATH \
-    && ldconfig \
+# Need to unset LD_LIBRARY_PATH first so that libraries in /opt/mesosphere/libmesos-bundle lib don't interfere with apt
+RUN unset LD_LIBRARY_PATH \
     && apt-key adv --keyserver "$GPG_KEYSERVER" --recv-keys "$NVIDIA_CUDA_TOOLS_GPG_KEY" \
     && echo "deb $NVIDIA_URL/cuda/repos/${NVIDIA_DISTRO}/x86_64 /" > /etc/apt/sources.list.d/nvidia-cuda.list \
     && echo "deb $NVIDIA_URL/machine-learning/repos/${NVIDIA_DISTRO}/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list \
@@ -34,9 +33,7 @@ RUN rm /etc/ld.so.conf.d/libmesos.conf \
     && ln -s /usr/local/cuda-9.0 /usr/local/cuda \
     && ln -s /usr/local/cuda-9.0/targets/x86_64-linux/lib/stubs/libcuda.so /usr/local/cuda-9.0/targets/x86_64-linux/lib/libcuda.so.1 \
     && apt-get clean \
-    && rm -rf /var/apt/lists/* \
-    && echo "${MESOSPHERE_PREFIX}/libmesos-bundle/lib" >> /etc/ld.so.conf.d/libmesos.conf \
-    && ldconfig
+    && rm -rf /var/apt/lists/*
 
 COPY spark-root-conda-cudnn-env.yml "${CONDA_DIR}/"
 

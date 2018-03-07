@@ -94,9 +94,11 @@ RUN echo "deb ${REPO}/${DISTRO} ${CODENAME} main" \
        git \
        gnupg \
        jq \
+       less \
        nginx \
        openssh-client \
        procps \
+       r-base \
        rsync \
        runit \
        sudo \
@@ -111,13 +113,11 @@ RUN echo "deb ${REPO}/${DISTRO} ${CODENAME} main" \
     && echo nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin >> /etc/passwd
 
 RUN cd /tmp \
-    && mkdir -p "${JAVA_HOME}" "${SPARK_HOME}" \
-    && mkdir -p "${MESOSPHERE_PREFIX}" "${MESOSPHERE_PREFIX}/bin" \
+    && mkdir -p "${JAVA_HOME}" "${SPARK_HOME}" "${MESOSPHERE_PREFIX}/bin" \
     && curl --retry 3 -fsSL -O "${LIBMESOS_BUNDLE_URL}/libmesos-bundle-${LIBMESOS_BUNDLE_VERSION}.tar.gz" \
     && echo "${LIBMESOS_BUNDLE_SHA256}" "libmesos-bundle-${LIBMESOS_BUNDLE_VERSION}.tar.gz" | sha256sum -c - \
     && tar xf "libmesos-bundle-${LIBMESOS_BUNDLE_VERSION}.tar.gz" -C "${MESOSPHERE_PREFIX}" \
     && rm "libmesos-bundle-${LIBMESOS_BUNDLE_VERSION}.tar.gz" \
-    && echo "${MESOSPHERE_PREFIX}/libmesos-bundle/lib" >> /etc/ld.so.conf.d/libmesos.conf \
     && cd "${MESOSPHERE_PREFIX}/libmesos-bundle/lib" \
     && curl --retry 3 -fsSL -O "${MESOS_MAVEN_URL}/${MESOS_VERSION}/mesos-${MESOS_VERSION}.jar" \
     && echo "${MESOS_JAR_SHA1} mesos-${MESOS_VERSION}.jar" | sha1sum -c - \
@@ -154,6 +154,11 @@ COPY runit/init.sh /sbin/init.sh
 COPY nginx /etc/nginx
 COPY krb5.conf.mustache /etc/
 COPY conf/ "${SPARK_HOME}/conf/"
+COPY profile "/root/.profile"
+COPY bash_profile "/root/.bash_profile"
+COPY bashrc "/root/.bashrc"
+COPY dircolors "/root/.dircolors"
+
 
 RUN mkdir -p /var/lib/nginx \
     && ln -s /var/lib/runit/service/spark /etc/service/spark \
@@ -164,8 +169,8 @@ RUN mkdir -p /var/lib/nginx \
     && chmod -R ugo+rw /var/lib/nginx \
     && chmod -R ugo+rw /var/log/nginx \
     && chmod -R ugo+rw /var/run \
-    && chmod -R ugo+rw "${SPARK_HOME}/conf" \
-    && ldconfig
+    && chmod -R ugo+rw "${SPARK_HOME}/conf"
 
-ENV LD_LIBRARY_PATH="${MESOSPHERE_PREFIX}/libmesos-bundle/lib"
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${MESOSPHERE_PREFIX}/libmesos-bundle/lib"
+
 WORKDIR "${SPARK_HOME}"

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 set -e
 set -x
 
@@ -33,9 +34,9 @@ function set_log_level() {
 }
 
 function add_if_non_empty() {
-        if [ -n "$2" ]; then
-                echo "$1=$2" >> "${SPARK_DIST_PATH}/conf/mesos-cluster-dispatcher.properties"
-        fi
+    if [ -n "$2" ]; then
+        echo "$1=$2" >> "${SPARK_DIST_PATH}/conf/mesos-cluster-dispatcher.properties"
+    fi
 }
 
 function configure_properties() {
@@ -67,10 +68,10 @@ ZK=${ZK:-"zk-1.zk:2181,zk-2.zk:2181,zk-3.zk:2181,zk-4.zk:2181,zk-5.zk:2181"}
 
 exec "${SPARK_DIST_PATH}/bin/spark-class" \
     org.apache.spark.deploy.mesos.MesosClusterDispatcher \
-    --port "${PORT_DISPATCHER}" \
-    --webui-port "${PORT_UI}" \
-    --master "mesos://zk://${ZK}/mesos" \
-    --zk "${ZK}" \
     --host "${HOST}" \
+    --master "mesos://zk://${ZK}/mesos" \
     --name "${DCOS_SERVICE_NAME}" \
-    --properties-file "${SPARK_DIST_PATH}/conf/mesos-cluster-dispatcher.properties"
+    --port "${PORT0}" \
+    --properties-file "${SPARK_DIST_PATH}/conf/mesos-cluster-dispatcher.properties" \
+    --webui-port "${PORT1}" \
+    --zk "${ZK}"

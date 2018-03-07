@@ -8,7 +8,7 @@
     "type": "MESOS",
     "docker": {
       "forcePullImage": true,
-      "image": "vishnumohan/spark-dcos:latest-base"
+      "image": "vishnumohan/spark-dcos"
     }
   },
   "env": {
@@ -28,6 +28,7 @@
     "SPARK_DISPATCHER_MESOS_ROLE": "dev-spark-dispatcher",
     "SPARK_DISPATCHER_MESOS_SECRET": "",
     "SPARK_HDFS_CONFIG_URL": "",
+    "SPARK_HISTORY_SERVER_URL": "https://<DCOS_URL>/service/dev/spark/history",
     "SPARK_LOG_LEVEL": "INFO",
     "SPARK_USER": "nobody"
   },

@@ -1,0 +1,75 @@
+{
+  "id": "/dev/spark/history",
+  "cpus": 1,
+  "mem": 2048,
+  "user": "nobody",
+  "cmd": "SPARK_HISTORY_OPTS=\"-Dspark.history.ui.port=${PORT_HISTORY} ${SPARK_HISTORY_OPTS} -Dspark.history.fs.logDirectory=${HISTORY_LOG_DIRECTORY}\" ./bin/spark-class org.apache.spark.deploy.history.HistoryServer",
+  "container": {
+    "type": "MESOS",
+    "docker": {
+      "forcePullImage": true,
+      "image": "vishnumohan/spark-dcos"
+    }
+  },
+  "env": {
+    "APPLICATION_WEB_PROXY_BASE": "/service/dev/spark/history",
+    "HISTORY_LOG_DIRECTORY": "s3a://vishnu-mohan/spark/history",
+    "AWS_ACCESS_KEY_ID": {
+      "secret": "secret0"
+    },
+    "AWS_SECRET_ACCESS_KEY": {
+      "secret": "secret1"
+    },
+    "SPARK_HISTORY_OPTS": "-Dspark.history.fs.cleaner.enabled=false -Dspark.history.fs.cleaner.interval=1d -Dspark.history.fs.cleaner.maxAge=7d"
+  },
+  "secrets": {
+    "secret0": {
+      "source": "/dev/spark/AWS_ACCESS_KEY_ID"
+    },
+    "secret1": {
+      "source": "/dev/spark/AWS_SECRET_ACCESS_KEY"
+    }
+  },
+  "labels": {
+    "DCOS_PACKAGE_IS_FRAMEWORK": "false",
+    "DCOS_PACKAGE_METADATA": "eyJwYWNrYWdpbmdWZXJzaW9uIjoiMy4wIiwibmFtZSI6InNwYXJrLWhpc3RvcnkiLCJ2ZXJzaW9uIjoiMi4xLjAtMSIsIm1haW50YWluZXIiOiJzdXBwb3J0QG1lc29zcGhlcmUuaW8iLCJkZXNjcmlwdGlvbiI6IlRoZSBBcGFjaGUgU3BhcmsgSGlzdG9yeSBTZXJ2ZXIgYWxsb3dzIHlvdSB0byB2aWV3IHRoZSBzdGF0ZSBvZiBydW5uaW5nIGFuZCBjb21wbGV0ZWQgU3Bhcmsgam9icy4iLCJ0YWdzIjpbImJpZ2RhdGEiLCJtYXByZWR1Y2UiLCJiYXRjaCIsImFuYWx5dGljcyJdLCJzZWxlY3RlZCI6ZmFsc2UsInNjbSI6Imh0dHBzOi8vZ2l0aHViLmNvbS9hcGFjaGUvc3BhcmsuZ2l0Iiwid2Vic2l0ZSI6Imh0dHBzOi8vZG9jcy5tZXNvc3BoZXJlLmNvbS9jdXJyZW50L3VzYWdlL3NlcnZpY2UtZ3VpZGVzL3NwYXJrLyIsImZyYW1ld29yayI6ZmFsc2UsInBvc3RJbnN0YWxsTm90ZXMiOiJUaGUgQXBhY2hlIFNwYXJrIEhpc3RvcnkgU2VydmVyIGlzIGJlaW5nIGluc3RhbGxlZCEiLCJwb3N0VW5pbnN0YWxsTm90ZXMiOiJUaGUgQXBhY2hlIFNwYXJrIEhpc3RvcnkgU2VydmVyIGhhcyBiZWVuIHVuaW5zdGFsbGVkIGFuZCB3aWxsIG5vIGxvbmdlciBydW4uIiwibGljZW5zZXMiOlt7Im5hbWUiOiJBcGFjaGUgTGljZW5zZSBWZXJzaW9uIDIuMCIsInVybCI6Imh0dHBzOi8vcmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbS9hcGFjaGUvc3BhcmsvbWFzdGVyL0xJQ0VOU0UifV0sImltYWdlcyI6eyJpY29uLXNtYWxsIjoiaHR0cHM6Ly9kb3dubG9hZHMubWVzb3NwaGVyZS5pby9zcGFyay9hc3NldHMvaWNvbi1zZXJ2aWNlLXNwYXJrLXNtYWxsLnBuZyIsImljb24tbWVkaXVtIjoiaHR0cHM6Ly9kb3dubG9hZHMubWVzb3NwaGVyZS5pby9zcGFyay9hc3NldHMvaWNvbi1zZXJ2aWNlLXNwYXJrLW1lZGl1bS5wbmciLCJpY29uLWxhcmdlIjoiaHR0cHM6Ly9kb3dubG9hZHMubWVzb3NwaGVyZS5pby9zcGFyay9hc3NldHMvaWNvbi1zZXJ2aWNlLXNwYXJrLWxhcmdlLnBuZyJ9fQo=",
+    "DCOS_PACKAGE_NAME": "spark-history",
+    "DCOS_PACKAGE_REGISTRY_VERSION": "3.0",
+    "DCOS_PACKAGE_RELEASE": "0",
+    "DCOS_PACKAGE_SOURCE": "https://universe.mesosphere.com/repo",
+    "DCOS_PACKAGE_VERSION": "2.1.0-2.2.1-1",
+    "DCOS_SERVICE_NAME": "/dev/spark/history",
+    "DCOS_SERVICE_PORT_INDEX": "0",
+    "DCOS_SERVICE_SCHEME": "http",
+    "MARATHON_SINGLE_INSTANCE_APP": "true"
+  },
+  "portDefinitions": [
+    {
+      "protocol": "tcp",
+      "port": 0,
+      "name": "history",
+      "labels": {
+        "VIP_0": "/dev/spark/history:18080"
+      }
+    }
+  ],
+  "healthChecks": [
+    {
+      "protocol": "MESOS_HTTP",
+      "path": "/",
+      "portIndex": 0,
+      "gracePeriodSeconds": 60,
+      "intervalSeconds": 20,
+      "timeoutSeconds": 10,
+      "maxConsecutiveFailures": 3
+    }
+  ],
+  "upgradeStrategy": {
+    "maximumOverCapacity": 0,
+    "minimumHealthCapacity": 0
+  },
+  "unreachableStrategy": {
+    "expungeAfterSeconds": 0,
+    "inactiveAfterSeconds": 0
+  }
+}

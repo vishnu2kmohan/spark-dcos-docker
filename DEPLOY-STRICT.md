@@ -52,10 +52,25 @@ curl --cacert dcos-ca.crt -fsSL -X POST -H "Authorization: token=$(dcos config s
 
 curl --cacert dcos-ca.crt -fsSL -X POST -H "Authorization: token=$(dcos config show core.dcos_acs_token)" -H "Content-Type: application/json" $(dcos config show core.dcos_url)/mesos/quota -d @dev-spark-executor-quota.json
 
+dcos marathon app add spark-dispatcher-ucr-strict.json
+dcos marathon app add spark-history-s3.json
+
 dcos spark run --verbose --name=/dev/spark/dispatcher --submit-args=" \
 --conf spark.mesos.principal=dev_spark_dispatcher \
 --conf spark.mesos.role=dev-spark-executor \
 --conf spark.mesos.containerizer=mesos \
+--class org.apache.spark.examples.SparkPi http://downloads.mesosphere.com/spark/assets/spark-examples_2.11-2.0.1.jar 100"
+
+dcos spark run --verbose --name=/dev/spark/dispatcher --submit-args=" \
+--conf spark.mesos.principal=dev_spark_dispatcher \
+--conf spark.mesos.role=dev-spark-executor \
+--conf spark.mesos.containerizer=mesos \
+--conf spark.mesos.driver.labels=DCOS_SPACE:/dev/spark \
+--conf spark.mesos.task.labels=DCOS_SPACE:/dev/spark \
+--conf spark.mesos.driver.secret.name=/dev/spark/AWS_ACCESS_KEY_ID,/dev/spark/AWS_SECRET_ACCESS_KEY \
+--conf spark.mesos.driver.secret.envkey=AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY \
+--conf spark.eventLog.enabled=true \
+--conf spark.eventLog.dir=s3a://vishnu-mohan/spark/history \
 --class org.apache.spark.examples.SparkPi http://downloads.mesosphere.com/spark/assets/spark-examples_2.11-2.0.1.jar 100"
 
 ```

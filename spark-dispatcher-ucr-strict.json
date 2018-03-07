@@ -15,7 +15,7 @@
     "DCOS_SERVICE_ACCOUNT_CREDENTIAL": {
       "secret": "serviceCredential"
     },
-    "DCOS_SERVICE_NAME": "/dev/spark/dispatcher",
+    "DCOS_SERVICE_NAME": "dev/spark/dispatcher",
     "JAVA_HOME": "/opt/jdk",
     "JVM_OPTS": "-Xms2048m -Xmx2048m",
     "LD_LIBRARY_PATH": "/opt/mesosphere/lib:/opt/mesosphere/libmesos-bundle/lib:/usr/lib",
@@ -46,7 +46,7 @@
     "DCOS_PACKAGE_OPTIONS": "e30=",
     "DCOS_PACKAGE_SOURCE": "https://universe.mesosphere.com/repo",
     "DCOS_PACKAGE_VERSION": "2.1.0-2.2.0-1",
-    "DCOS_SERVICE_NAME": "/dev/spark/dispatcher",
+    "DCOS_SERVICE_NAME": "dev/spark/dispatcher",
     "DCOS_SERVICE_PORT_INDEX": "2",
     "DCOS_SERVICE_SCHEME": "http",
     "SPARK_URI": ""

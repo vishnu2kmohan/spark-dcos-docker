@@ -38,7 +38,7 @@
     "DCOS_PACKAGE_RELEASE": "0",
     "DCOS_PACKAGE_SOURCE": "https://universe.mesosphere.com/repo",
     "DCOS_PACKAGE_VERSION": "2.1.0-2.2.1-1",
-    "DCOS_SERVICE_NAME": "/dev/spark/history",
+    "DCOS_SERVICE_NAME": "dev/spark/history",
     "DCOS_SERVICE_PORT_INDEX": "0",
     "DCOS_SERVICE_SCHEME": "http",
     "MARATHON_SINGLE_INSTANCE_APP": "true"

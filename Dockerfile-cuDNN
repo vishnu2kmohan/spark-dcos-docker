@@ -1,5 +1,6 @@
 FROM vishnumohan/spark-dcos
 
+ARG CONDA_ENV_YML="spark-root-conda-cudnn-env.yml"
 ARG NVIDIA_CUDA_MAJOR_VERSION="9-0"
 ARG NVIDIA_CUDA_PKG_VERSION="9.0.176-1"
 ARG NVIDIA_CUDA_VERSION="9.0"
@@ -35,8 +36,8 @@ RUN unset LD_LIBRARY_PATH \
     && apt-get clean \
     && rm -rf /var/apt/lists/*
 
-COPY spark-root-conda-cudnn-env.yml "${CONDA_DIR}/"
+COPY "${CONDA_ENV_YML}" "${CONDA_DIR}/"
 
-RUN $CONDA_DIR/bin/conda env update --json -q -f "${CONDA_DIR}/spark-root-conda-cudnn-env.yml" \
+RUN $CONDA_DIR/bin/conda env update --json -q -f "${CONDA_DIR}/${CONDA_ENV_YML}" \
     && $CONDA_DIR/bin/conda clean --json -tipsy \
     && rm -rf /root/.cache/pip/*

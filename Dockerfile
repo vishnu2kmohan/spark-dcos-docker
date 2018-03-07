@@ -8,6 +8,7 @@ ARG AWS_JAVA_SDK_VERSION="1.7.5"
 ARG BUILD_DATE
 ARG CODENAME="stretch"
 ARG CONDA_DIR="/opt/conda"
+ARG CONDA_ENV_YML="spark-root-conda-base-env.yml"
 ARG CONDA_INSTALLER="Miniconda3-4.3.31-Linux-x86_64.sh"
 ARG CONDA_MD5="7fe70b214bee1143e3e3f0467b71453c"
 ARG CONDA_URL="https://repo.continuum.io/miniconda"
@@ -137,7 +138,7 @@ RUN cd /tmp \
     && echo "${HADOOP_AWS_JAR_SHA1} hadoop-aws-${HADOOP_AWS_VERSION}.jar" | sha1sum -c - \
     && rm -rf /tmp/*
 
-COPY spark-root-conda-base-env.yml "${CONDA_DIR}/"
+COPY "${CONDA_ENV_YML}" "${CONDA_DIR}/"
 
 RUN curl --retry 3 -fsSL -O "$CONDA_URL/$CONDA_INSTALLER" \
     && echo "${CONDA_MD5}  ${CONDA_INSTALLER}" | md5sum -c - \
@@ -146,7 +147,7 @@ RUN curl --retry 3 -fsSL -O "$CONDA_URL/$CONDA_INSTALLER" \
     && $CONDA_DIR/bin/conda config --system --set auto_update_conda false \
     && $CONDA_DIR/bin/conda config --system --set show_channel_urls true \
     && $CONDA_DIR/bin/conda update --json --all -yq \
-    && $CONDA_DIR/bin/conda env update --json -q -f "${CONDA_DIR}/spark-root-conda-base-env.yml" \
+    && $CONDA_DIR/bin/conda env update --json -q -f "${CONDA_DIR}/${CONDA_ENV_YML}" \
     && $CONDA_DIR/bin/conda clean --json -tipsy
 
 COPY runit/service /var/lib/runit/service

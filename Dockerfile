@@ -37,7 +37,7 @@ ARG MESOS_VERSION="1.5.0"
 ARG REPO="http://cdn-fastly.deb.debian.org"
 ARG SPARK_DIST_URL="https://downloads.mesosphere.com/spark"
 ARG SPARK_HOME="/opt/spark"
-ARG SPARK_VERSION="2.2.1-1"
+ARG SPARK_VERSION="2.2.1-2-beta"
 ARG VCS_REF
 ARG VERSION="2.2.1-1.10.5"
 

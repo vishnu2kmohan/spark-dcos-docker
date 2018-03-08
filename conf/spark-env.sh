@@ -35,6 +35,7 @@ if [ -d "${MESOS_SANDBOX}" ] ; then
     export MESOS_DIRECTORY=${MESOS_SANDBOX}
     export MESOS_MODULES="{\"libraries\": [{\"file\": \"libdcos_security.so\", \"modules\": [{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"}]}]}"
     export MESOS_NATIVE_JAVA_LIBRARY=/opt/mesosphere/libmesos-bundle/lib/libmesos.so
+    export SPARK_DAEMON_JAVA_OPTS="-Djava.security.krb5.conf=/mnt/mesos/sandbox/krb5.conf -Djava.security.krb5.conf=/mnt/mesos/sandbox/krb5.conf"
 
     # Unless explicitly directed, use bootstrap to lookup the IP of the driver agent
     # this should be LIBPROCESS_IP iff the driver is on the host network, $(hostname) when it's not (e.g. CNI).
@@ -66,6 +67,14 @@ if [ -d "${MESOS_SANDBOX}" ] ; then
 
     if [[ -n "${KRB5_CONFIG_BASE64}" ]]; then
         KRB5CONF=${KRB5_CONFIG_BASE64}
+    fi
+
+    if ls ${MESOS_SANDBOX}/*.base64 1> /dev/null 2>&1; then
+        for f in $MESOS_SANDBOX/*.base64 ; do
+            echo "decoding $f" >&2
+            secret=$(basename ${f} .base64)
+            cat ${f} | base64 -d > ${secret}
+        done
     fi
 
     if [[ -n "${KRB5CONF}" ]]; then

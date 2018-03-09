@@ -53,19 +53,20 @@ if [ -d "${MESOS_SANDBOX}" ] ; then
 
     echo "spark-env: User: $(whoami)" >&2
 
-    if [ -n "${SPARK_SECURITY_KERBEROS_KDC_HOSTNAME}" ] && [ -n "${SPARK_SECURITY_KERBEROS_KDC_PORT}" ] && [ -n "${SPARK_SECURITY_KERBEROS_REALM}" ]; then
-        echo "spark-env: Templating krb5.conf from environment" >&2
-        # working dir is /mnt/mesos/sandbox
-        CONFIG_TEMPLATE_KRB5CONF=../../../etc/krb5.conf.mustache,/mnt/mesos/sandbox/krb5.conf $BOOTSTRAP -template -resolve=false --print-env=false -install-certs=false
-        cat /mnt/mesos/sandbox/krb5.conf
-    fi
-
     if ls "${MESOS_SANDBOX}/*.base64" 1> /dev/null 2>&1; then
+        echo "spark-env: Decoding files whose names end in .base64"
         for f in ${MESOS_SANDBOX}/*.base64 ; do
             echo "spark-env: Decoding base64 encoded $f" >&2
             secret=$(basename "${f}" .base64)
             base64 -d "${f}" > "${secret}"
         done
+    fi
+
+    if [ -n "${SPARK_SECURITY_KERBEROS_KDC_HOSTNAME}" ] && [ -n "${SPARK_SECURITY_KERBEROS_KDC_PORT}" ] && [ -n "${SPARK_SECURITY_KERBEROS_REALM}" ]; then
+        echo "spark-env: Templating krb5.conf from environment" >&2
+        # working dir is /mnt/mesos/sandbox
+        CONFIG_TEMPLATE_KRB5CONF=../../../etc/krb5.conf.mustache,/mnt/mesos/sandbox/krb5.conf $BOOTSTRAP -template -resolve=false --print-env=false -install-certs=false
+        cat /mnt/mesos/sandbox/krb5.conf
     fi
 
     if [[ -n "${SPARK_MESOS_KRB5_CONF_BASE64}" ]]; then
@@ -85,12 +86,15 @@ if [ -d "${MESOS_SANDBOX}" ] ; then
         fi
         echo "spark-env: Copying krb config from $KRB5CONF to $MESOS_SANDBOX" >&2
         echo "${KRB5CONF}" | ${BASE64_D} > "${MESOS_SANDBOX}/krb5.conf"
+    else
+        echo "spark-env: No SPARK_MESOS_KRB5_CONF_BASE64 decoded" >&2
+    fi
+
+    if [ -f "${MESOS_SANDBOX}/krb5.conf" ]; then
         SPARK_MASTER_OPTS=${SPARK_MASTER_OPTS:-""}
         export SPARK_MASTER_OPTS="${SPARK_MASTER_OPTS} -Djava.security.krb5.conf=/mnt/mesos/sandbox/krb5.conf"
         SPARK_WORKER_OPTS=${SPARK_WORKER_OPTS:-""}
         export SPARK_WORKER_OPTS="${SPARK_WORKER_OPTS} -Djava.security.krb5.conf=/mnt/mesos/sandbox/krb5.conf"
-    else
-        echo "spark-env: No SPARK_MESOS_KRB5_CONF_BASE64 decoded" >&2
     fi
 fi
 

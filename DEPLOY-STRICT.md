@@ -67,8 +67,8 @@ dcos spark run --verbose --name=/dev/spark/dispatcher --submit-args=" \
 --conf spark.mesos.containerizer=mesos \
 --conf spark.mesos.driver.labels=DCOS_SPACE:/dev/spark \
 --conf spark.mesos.task.labels=DCOS_SPACE:/dev/spark \
---conf spark.mesos.driver.secret.name=/dev/spark/AWS_ACCESS_KEY_ID,/dev/spark/AWS_SECRET_ACCESS_KEY \
---conf spark.mesos.driver.secret.envkey=AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY \
+--conf spark.mesos.driver.secret.names=/dev/spark/AWS_ACCESS_KEY_ID,/dev/spark/AWS_SECRET_ACCESS_KEY \
+--conf spark.mesos.driver.secret.envkeys=AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY \
 --conf spark.eventLog.enabled=true \
 --conf spark.eventLog.dir=s3a://vishnu-mohan/spark/history \
 --class org.apache.spark.examples.SparkPi http://downloads.mesosphere.com/spark/assets/spark-examples_2.11-2.0.1.jar 100"

@@ -73,4 +73,14 @@ dcos spark run --verbose --name=/dev/spark/dispatcher --submit-args=" \
 --conf spark.eventLog.dir=s3a://vishnu-mohan/spark/history \
 --class org.apache.spark.examples.SparkPi http://downloads.mesosphere.com/spark/assets/spark-examples_2.11-2.0.1.jar 100"
 
+dcos spark run --verbose --name=/dev/spark/dispatcher --submit-args=" \
+--conf spark.mesos.principal=dev_spark_dispatcher \
+--conf spark.mesos.role=dev-spark-executor \
+--conf spark.mesos.containerizer=mesos \
+--conf spark.mesos.driver.secret.values=dmlzaG51Cg==,dmlzaG51Cg== \
+--conf spark.mesos.driver.secret.filenames="calvin-user-1-keytab.base64,calvin-user-2-keytab.base64" \
+--conf spark.mesos.executor.secret.values=dmlzaG51Cg==,dmlzaG51Cg== \
+--conf spark.mesos.executor.secret.filenames=calvin-user-1-keytab.base64,calvin-user-2-keytab.base64 \
+--class org.apache.spark.examples.SparkPi http://downloads.mesosphere.com/spark/assets/spark-examples_2.11-2.0.1.jar 10000"
+
 ```

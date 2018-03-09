@@ -160,7 +160,6 @@ COPY bash_profile "/root/.bash_profile"
 COPY bashrc "/root/.bashrc"
 COPY dircolors "/root/.dircolors"
 
-
 RUN mkdir -p /var/lib/nginx \
     && ln -s /var/lib/runit/service/spark /etc/service/spark \
     && ln -s /var/lib/runit/service/nginx /etc/service/nginx \

@@ -53,8 +53,10 @@ if [ -d "${MESOS_SANDBOX}" ] ; then
 
     echo "spark-env: User: $(whoami)" >&2
 
-    if ls "${MESOS_SANDBOX}/*.base64" 1> /dev/null 2>&1; then
-        echo "spark-env: Decoding files whose names end in .base64"
+    echo "spark-env: Files ending in .base64 in ${MESOS_SANDBOX}:" >&2
+    ls -al ${MESOS_SANDBOX}/*.base64 >&2
+    if ls ${MESOS_SANDBOX}/*.base64 1> /dev/null 2>&1; then
+        echo "spark-env: Decoding files that end in .base64" >&2
         for f in ${MESOS_SANDBOX}/*.base64 ; do
             echo "spark-env: Decoding base64 encoded $f" >&2
             secret=$(basename "${f}" .base64)

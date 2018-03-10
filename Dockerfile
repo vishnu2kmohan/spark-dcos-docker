@@ -25,14 +25,13 @@ ARG HADOOP_VERSION="2.7"
 ARG JAVA_HOME="/opt/jdk"
 ARG JAVA_URL="https://downloads.mesosphere.com/java"
 ARG JAVA_VERSION="8u162"
-ARG MESOSPHERE_PREFIX="/opt/mesosphere"
 ARG LIBMESOS_BUNDLE_SHA256="875f6500101c7b219feebe05bd8ca68ea98682f974ca7f8efc14cb52790977b0"
 ARG LIBMESOS_BUNDLE_URL="https://downloads.mesosphere.com/libmesos-bundle"
 ARG LIBMESOS_BUNDLE_VERSION="master-28f8827"
+ARG MESOSPHERE_PREFIX="/opt/mesosphere"
 ARG MESOS_JAR_SHA1="0cef8031567f2ef367e8b6424a94d518e76fb8dc"
 ARG MESOS_MAVEN_URL="https://repository.apache.org/service/local/repositories/releases/content/org/apache/mesos/mesos"
 ARG MESOS_PROTOBUF_JAR_SHA1="189ef74959049521be8f5a1c3de3921eb0117ffb"
-ARG MESOS_SANDBOX="/mnt/mesos/sandbox"
 ARG MESOS_VERSION="1.5.0"
 ARG REPO="http://cdn-fastly.deb.debian.org"
 ARG SPARK_DIST_URL="https://downloads.mesosphere.com/spark"
@@ -62,16 +61,11 @@ ENV BOOTSTRAP="${MESOSPHERE_PREFIX}/bin/bootstrap" \
     LANG="en_US.UTF-8" \
     LANGUAGE="en_US.UTF-8" \
     LC_ALL="en_US.UTF-8" \
-    LIBPROCESS_SSL_CA_DIR="${MESOS_SANDBOX}/.ssl" \
-    LIBPROCESS_SSL_CA_FILE="${MESOS_SANDBOX}.ssl/ca.crt" \
-    LIBPROCESS_SSL_CERT_FILE="${MESOS_SANDBOX}/.ssl/scheduler.crt" \
-    LIBPROCESS_SSL_KEY_FILE="${MESOS_SANDBOX}/.ssl/scheduler.key" \
     MESOSPHERE_PREFIX=${MESOSPHERE_PREFIX:-"/opt/mesosphere}" \
     MESOS_AUTHENTICATEE="com_mesosphere_dcos_ClassicRPCAuthenticatee" \
     MESOS_MODULES="{\"libraries\": [{\"file\": \"libdcos_security.so\", \"modules\": [{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"}]}]}" \
     MESOS_NATIVE_LIBRARY="${MESOSPHERE_PREFIX}/libmesos-bundle/lib/libmesos.so" \
     MESOS_NATIVE_JAVA_LIBRARY="${MESOSPHERE_PREFIX}/libmesos-bundle/lib/libmesos.so" \
-    MESOS_SANDBOX=${MESOS_SANDBOX:-"/mnt/mesos/sandbox"} \
     PATH="${JAVA_HOME}/bin:${SPARK_HOME}/bin:${CONDA_DIR}/bin:${MESOSPHERE_PREFIX}/bin:${PATH}" \
     SHELL="/bin/bash" \
     SPARK_HOME=${SPARK_HOME:-"/opt/spark"}
@@ -170,7 +164,7 @@ RUN mkdir -p /var/lib/nginx \
     && chmod -R ugo+rw /var/log/nginx \
     && chmod -R ugo+rw /var/run \
     && chmod -R ugo+rw "${SPARK_HOME}/conf" \
-    && cp ${CONDA_DIR}/share/examples/krb5/krb5.conf /etc \
+    && cp "${CONDA_DIR}/share/examples/krb5/krb5.conf" /etc \
     && chmod ugo+rw /etc/krb5.conf
 
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${MESOSPHERE_PREFIX}/libmesos-bundle/lib"

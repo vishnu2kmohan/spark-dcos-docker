@@ -169,7 +169,9 @@ RUN mkdir -p /var/lib/nginx \
     && chmod -R ugo+rw /var/lib/nginx \
     && chmod -R ugo+rw /var/log/nginx \
     && chmod -R ugo+rw /var/run \
-    && chmod -R ugo+rw "${SPARK_HOME}/conf"
+    && chmod -R ugo+rw "${SPARK_HOME}/conf" \
+    && cp ${CONDA_DIR}/share/examples/krb5/krb5.conf /etc \
+    && chmod ugo+rw /etc/krb5.conf
 
 ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:${MESOSPHERE_PREFIX}/libmesos-bundle/lib"
 

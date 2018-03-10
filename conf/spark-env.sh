@@ -63,8 +63,9 @@ if [ -d "${MESOS_SANDBOX}" ] ; then
 
     if [ -n "${SPARK_SECURITY_KERBEROS_KDC_HOSTNAME}" ] && [ -n "${SPARK_SECURITY_KERBEROS_KDC_PORT}" ] && [ -n "${SPARK_SECURITY_KERBEROS_REALM}" ]; then
         echo "spark-env: Rendering krb5.conf from environment variables" >&2
-        # working dir is /mnt/mesos/sandbox
-        CONFIG_TEMPLATE_KRB5CONF=../../../etc/krb5.conf.mustache,/mnt/mesos/sandbox/krb5.conf $BOOTSTRAP -template -resolve=false --print-env=false -install-certs=false
+        CONFIG_TEMPLATE_KRB5CONF=../../../etc/krb5.conf.mustache,/etc/krb5.conf $BOOTSTRAP -template -resolve=false --print-env=false -install-certs=false
+        echo "spark-env: /etc/krb5.conf" >&2
+        cat /etc/krb5.conf >&2
     fi
 
     if [[ -n "${SPARK_MESOS_KRB5_CONF_BASE64}" ]]; then

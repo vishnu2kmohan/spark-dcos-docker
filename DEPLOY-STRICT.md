@@ -1,4 +1,4 @@
-```
+```bash
 dcos security org service-accounts keypair dispatcher-private-key.pem dispatcher-public-key.pem
 
 dcos security org service-accounts create -p dispatcher-public-key.pem -d "Dev Spark Service Account" dev_spark_dispatcher
@@ -65,12 +65,12 @@ dcos spark run --verbose --name=/dev/spark/dispatcher --submit-args=" \
 --conf spark.mesos.principal=dev_spark_dispatcher \
 --conf spark.mesos.role=dev-spark-executor \
 --conf spark.mesos.containerizer=mesos \
---conf spark.mesos.driver.labels=DCOS_SPACE:/dev/spark \
---conf spark.mesos.task.labels=DCOS_SPACE:/dev/spark \
---conf spark.mesos.driver.secret.names=/dev/spark/AWS_ACCESS_KEY_ID,/dev/spark/AWS_SECRET_ACCESS_KEY \
---conf spark.mesos.driver.secret.envkeys=AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY \
---conf spark.eventLog.enabled=true \
---conf spark.eventLog.dir=s3a://vishnu-mohan/spark/history \
+--conf spark.mesos.driverEnv.SPARK_MESOS_KRB5_CONF_BASE64=dmlzaG51Cg== \
+--conf spark.executorEnv.SPARK_MESOS_KRB5_CONF_BASE64=dmlzaG51Cg== \
+--conf spark.mesos.driver.secret.values=dmlzaG51Cg==,dmlzaG51Cg== \
+--conf spark.mesos.driver.secret.filenames="calvin-user-1-keytab.base64,calvin-user-2-keytab.base64" \
+--conf spark.mesos.executor.secret.values=dmlzaG51Cg==,dmlzaG51Cg== \
+--conf spark.mesos.executor.secret.filenames=calvin-user-1-keytab.base64,calvin-user-2-keytab.base64 \
 --class org.apache.spark.examples.SparkPi http://downloads.mesosphere.com/spark/assets/spark-examples_2.11-2.0.1.jar 100"
 
 dcos spark run --verbose --name=/dev/spark/dispatcher --submit-args=" \
@@ -79,10 +79,31 @@ dcos spark run --verbose --name=/dev/spark/dispatcher --submit-args=" \
 --conf spark.mesos.containerizer=mesos \
 --conf spark.mesos.driverEnv.SPARK_MESOS_KRB5_CONF_BASE64=dmlzaG51Cg== \
 --conf spark.executorEnv.SPARK_MESOS_KRB5_CONF_BASE64=dmlzaG51Cg== \
+--conf spark.mesos.driver.labels=DCOS_SPACE:/dev/spark \
+--conf spark.mesos.task.labels=DCOS_SPACE:/dev/spark \
+--conf spark.mesos.driver.secret.names=/dev/spark/AWS_ACCESS_KEY_ID,/dev/spark/AWS_SECRET_ACCESS_KEY \
+--conf spark.mesos.driver.secret.envkeys=AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY \
+--conf spark.eventLog.enabled=true \
+--conf spark.eventLog.dir=s3a://vishnu-mohan/spark/history \
+--class org.apache.spark.examples.SparkPi http://downloads.mesosphere.com/spark/assets/spark-examples_2.11-2.0.1.jar 100"
+
+DO NOT RUN:
+dcos spark run --verbose --name=/dev/spark/dispatcher --submit-args=" \
+--conf spark.mesos.principal=dev_spark_dispatcher \
+--conf spark.mesos.role=dev-spark-executor \
+--conf spark.mesos.containerizer=mesos \
+--conf spark.mesos.driverEnv.SPARK_MESOS_KRB5_CONF_BASE64=dmlzaG51Cg== \
+--conf spark.executorEnv.SPARK_MESOS_KRB5_CONF_BASE64=dmlzaG51Cg== \
+--conf spark.mesos.driver.labels=DCOS_SPACE:/dev/spark \
+--conf spark.mesos.task.labels=DCOS_SPACE:/dev/spark \
+--conf spark.mesos.driver.secret.names=/dev/spark/AWS_ACCESS_KEY_ID,/dev/spark/AWS_SECRET_ACCESS_KEY \
+--conf spark.mesos.driver.secret.envkeys=AWS_ACCESS_KEY_ID,AWS_SECRET_ACCESS_KEY \
 --conf spark.mesos.driver.secret.values=dmlzaG51Cg==,dmlzaG51Cg== \
 --conf spark.mesos.driver.secret.filenames="calvin-user-1-keytab.base64,calvin-user-2-keytab.base64" \
 --conf spark.mesos.executor.secret.values=dmlzaG51Cg==,dmlzaG51Cg== \
 --conf spark.mesos.executor.secret.filenames=calvin-user-1-keytab.base64,calvin-user-2-keytab.base64 \
---class org.apache.spark.examples.SparkPi http://downloads.mesosphere.com/spark/assets/spark-examples_2.11-2.0.1.jar 10"
+--conf spark.eventLog.enabled=true \
+--conf spark.eventLog.dir=s3a://vishnu-mohan/spark/history \
+--class org.apache.spark.examples.SparkPi http://downloads.mesosphere.com/spark/assets/spark-examples_2.11-2.0.1.jar 100"
 
 ```

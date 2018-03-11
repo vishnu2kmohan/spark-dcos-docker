@@ -7,5 +7,4 @@ dependencies:
 - ipython
 - libhdfs3
 - pyarrow
-- pyspark=2.2.1=py36_0
 - s3fs

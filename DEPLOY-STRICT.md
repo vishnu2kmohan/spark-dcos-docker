@@ -52,8 +52,8 @@ curl --cacert dcos-ca.crt -fsSL -X POST -H "Authorization: token=$(dcos config s
 
 curl --cacert dcos-ca.crt -fsSL -X POST -H "Authorization: token=$(dcos config show core.dcos_acs_token)" -H "Content-Type: application/json" $(dcos config show core.dcos_url)/mesos/quota -d @dev-spark-executor-quota.json
 
-dcos marathon app add spark-dispatcher-ucr-strict.json
-dcos marathon app add spark-history-s3.json
+dcos marathon app add spark-dispatcher-ucr.json
+dcos marathon app add spark-history-s3-ucr.json
 
 dcos spark run --verbose --name=/dev/spark/dispatcher --submit-args=" \
 --conf spark.mesos.principal=dev_spark_dispatcher \

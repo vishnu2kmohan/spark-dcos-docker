@@ -31,9 +31,11 @@ if [ -d "${MESOS_SANDBOX}" ] ; then
     export LIBPROCESS_SSL_CERT_FILE=${MESOS_SANDBOX}/.ssl/scheduler.crt
     export LIBPROCESS_SSL_KEY_FILE=${MESOS_SANDBOX}/.ssl/scheduler.key
     export MESOS_AUTHENTICATEE="com_mesosphere_dcos_ClassicRPCAuthenticatee"
+    export MESOS_HTTP_AUTHENTICATEE="com_mesosphere_dcos_http_Authenticatee"
     export MESOS_DIRECTORY=${MESOS_SANDBOX}
     export MESOS_MODULES="{\"libraries\": [{\"file\": \"libdcos_security.so\", \"modules\": [{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"}]}]}"
-    export MESOS_NATIVE_JAVA_LIBRARY=/opt/mesosphere/libmesos-bundle/lib/libmesos.so
+    export MESOS_NATIVE_JAVA_LIBRARY=${MESOSPHERE_PREFIX}/libmesos-bundle/lib/libmesos.so
+    export MESOS_NATIVE_LIBRARY=${MESOSPHERE_PREFIX}/libmesos-bundle/lib/libmesos.so
 
     # Unless explicitly directed, use bootstrap to lookup the IP of the driver agent
     # this should be LIBPROCESS_IP iff the driver is on the host network, $(hostname) when it's not (e.g. CNI).

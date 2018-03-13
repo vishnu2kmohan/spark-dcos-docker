@@ -31,8 +31,11 @@ RUN unset LD_LIBRARY_PATH \
        "cuda-libraries-dev-${NVIDIA_CUDA_MAJOR_VERSION}=${NVIDIA_CUDA_PKG_VERSION}" \
        "libnccl2=${NVIDIA_NCCL_VERSION}" \
        "libcudnn7=${NVIDIA_CUDNN_PKG_VERSION}" \
-    && ln -s /usr/local/cuda-9.0 /usr/local/cuda \
-    && ln -s /usr/local/cuda-9.0/targets/x86_64-linux/lib/stubs/libcuda.so /usr/local/cuda-9.0/targets/x86_64-linux/lib/libcuda.so.1 \
+    && cd /usr/local \
+    && ln -s "cuda-${NVIDIA_CUDA_VERSION}" cuda \
+    && cd cuda-"${NVIDIA_CUDA_VERSION}/targets/x86_64-linux/lib" \
+    && ln -s stubs/libcuda.so libcuda.so.1 \
+    && ldconfig \
     && apt-get clean \
     && rm -rf /var/apt/lists/*
 

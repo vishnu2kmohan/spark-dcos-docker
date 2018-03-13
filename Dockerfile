@@ -46,7 +46,7 @@ LABEL maintainer="Vishnu Mohan <vishnu@mesosphere.com>" \
       org.label-schema.description="Apache Spark is a fast and general engine for large-scale data processing" \
       org.label-schema.url="http://spark.apache.org" \
       org.label-schema.vcs-ref=$VCS_REF \
-      org.label-schema.vcs-url="https://github.com/vishnu2kmohan/spark-dcos" \
+      org.label-schema.vcs-url="https://github.com/vishnu2kmohan/spark-dcos-docker" \
       org.label-schema.version=$VERSION \
       org.label-schema.schema-version="1.0"
 

@@ -8,29 +8,33 @@ ARG NVIDIA_CUDA_TOOLS_GPG_KEY="7fa2af80"
 ARG NVIDIA_CUDNN_MAJOR_VERSION="7"
 ARG NVIDIA_CUDNN_PKG_VERSION="7.1.1.5-1+cuda9.0"
 ARG NVIDIA_DISTRO="ubuntu1604"
+ARG NVIDIA_DRIVER_CAPABILITIES="compute,utility"
 ARG NVIDIA_NCCL_MAJOR_VERSION="2"
-ARG NVIDIA_NCCL_VERSION="2.1.2-1+cuda9.0"
+ARG NVIDIA_NCCL_PKG_VERSION="2.1.2-1+cuda9.0"
+ARG NVIDIA_REQUIRE_CUDA="cuda>=9.0"
 ARG NVIDIA_URL="http://developer.download.nvidia.com/compute"
+ARG NVIDIA_VISIBLE_DEVICES="all"
+ARG NVIDIA_VOLUMES_NEEDED="nvidia_driver"
 
-ENV NVIDIA_VISIBLE_DEVICES=all \
-    NVIDIA_DRIVER_CAPABILITIES=compute,utility \
-    NVIDIA_REQUIRE_CUDA="cuda>=9.0"
+ENV NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-"all"} \
+    NVIDIA_DRIVER_CAPABILITIES=${NVIDIA_DRIVER_CAPABILITIES:-"compute,utility"} \
+    NVIDIA_REQUIRE_CUDA=${NVIDIA_REQUIRE_CUDA:-"cuda>=9.0"}
 
-LABEL com.nvidia.volumes.needed="nvidia_driver" \
+LABEL com.nvidia.volumes.needed=${NVIDIA_VOLUMES_NEEDED:-"nvidia_driver"} \
       com.nvidia.cuda.version="${NVIDIA_CUDA_PKG_VERSION}" \
       com.nvidia.cudnn.version="${NVIDIA_CUDNN_VERSION}"
 
 # Need to unset LD_LIBRARY_PATH first so that libraries in ${MESOSPHERE_PREFIX}/libmesos-bundle/lib don't interfere with apt
 RUN unset LD_LIBRARY_PATH \
-    && apt-key adv --keyserver "$GPG_KEYSERVER" --recv-keys "$NVIDIA_CUDA_TOOLS_GPG_KEY" \
-    && echo "deb $NVIDIA_URL/cuda/repos/${NVIDIA_DISTRO}/x86_64 /" > /etc/apt/sources.list.d/nvidia-cuda.list \
-    && echo "deb $NVIDIA_URL/machine-learning/repos/${NVIDIA_DISTRO}/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list \
+    && apt-key adv --keyserver "${GPG_KEYSERVER}" --recv-keys "${NVIDIA_CUDA_TOOLS_GPG_KEY}" \
+    && echo "deb ${NVIDIA_URL}/cuda/repos/${NVIDIA_DISTRO}/x86_64 /" > /etc/apt/sources.list.d/nvidia-cuda.list \
+    && echo "deb ${NVIDIA_URL}/machine-learning/repos/${NVIDIA_DISTRO}/x86_64 /" > /etc/apt/sources.list.d/nvidia-ml.list \
     && apt-get update -yq --fix-missing \
     && apt-get install -yq --no-install-recommends \
        "cuda-cudart-${NVIDIA_CUDA_MAJOR_VERSION}=${NVIDIA_CUDA_PKG_VERSION}" \
        "cuda-libraries-${NVIDIA_CUDA_MAJOR_VERSION}=${NVIDIA_CUDA_PKG_VERSION}" \
        "cuda-libraries-dev-${NVIDIA_CUDA_MAJOR_VERSION}=${NVIDIA_CUDA_PKG_VERSION}" \
-       "libnccl${NVIDIA_NCCL_MAJOR_VERSION}=${NVIDIA_NCCL_VERSION}" \
+       "libnccl${NVIDIA_NCCL_MAJOR_VERSION}=${NVIDIA_NCCL_PKG_VERSION}" \
        "libcudnn${NVIDIA_CUDNN_MAJOR_VERSION}=${NVIDIA_CUDNN_PKG_VERSION}" \
     && cd /usr/local \
     && ln -s "cuda-${NVIDIA_CUDA_VERSION}" cuda \
@@ -42,6 +46,7 @@ RUN unset LD_LIBRARY_PATH \
 
 COPY "${CONDA_ENV_YML}" "${CONDA_DIR}/"
 
-RUN $CONDA_DIR/bin/conda env update --json -q -f "${CONDA_DIR}/${CONDA_ENV_YML}" \
-    && $CONDA_DIR/bin/conda clean --json -tipsy \
+RUN ${CONDA_DIR}/bin/conda env update --json -q -f "${CONDA_DIR}/${CONDA_ENV_YML}" \
+    && ${CONDA_DIR}/bin/conda update --json --all -yq \
+    && ${CONDA_DIR}/bin/conda clean --json -tipsy \
     && rm -rf /root/.cache/pip/*

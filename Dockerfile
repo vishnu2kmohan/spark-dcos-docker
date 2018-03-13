@@ -64,7 +64,7 @@ ENV BOOTSTRAP="${MESOSPHERE_PREFIX}/bin/bootstrap" \
     LANG=${LANG:-"en_US.UTF-8"} \
     LANGUAGE=${LANGUAGE:-"en_US.UTF-8"} \
     LC_ALL=${LC_ALL:-"en_US.UTF-8"} \
-    MESOSPHERE_PREFIX=${MESOSPHERE_PREFIX:-"/opt/mesosphere}" \
+    MESOSPHERE_PREFIX=${MESOSPHERE_PREFIX:-"/opt/mesosphere"} \
     MESOS_AUTHENTICATEE="com_mesosphere_dcos_ClassicRPCAuthenticatee" \
     MESOS_HTTP_AUTHENTICATEE="com_mesosphere_dcos_http_Authenticatee" \
     MESOS_MODULES="{\"libraries\": [{\"file\": \"libdcos_security.so\", \"modules\": [{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"}]}]}" \
@@ -109,7 +109,7 @@ RUN echo "deb ${REPO}/${DISTRO} ${CODENAME} main" \
     && usermod -u 99 nobody \
     && addgroup --gid 99 nobody \
     && usermod -g nobody nobody \
-    && echo nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin >> /etc/passwd
+    && echo "nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin" >> /etc/passwd
 
 RUN cd /tmp \
     && mkdir -p "${JAVA_HOME}" "${SPARK_HOME}" "${MESOSPHERE_PREFIX}/bin" \
@@ -138,15 +138,17 @@ RUN cd /tmp \
 
 COPY "${CONDA_ENV_YML}" "${CONDA_DIR}/"
 
-RUN curl --retry 3 -fsSL -O "$CONDA_URL/$CONDA_INSTALLER" \
+RUN cd /tmp \
+    && curl --retry 3 -fsSL -O "${CONDA_URL}/${CONDA_INSTALLER}" \
     && echo "${CONDA_MD5}  ${CONDA_INSTALLER}" | md5sum -c - \
-    && bash "./$CONDA_INSTALLER" -u -b -p "$CONDA_DIR" \
-    && $CONDA_DIR/bin/conda config --system --prepend channels conda-forge \
-    && $CONDA_DIR/bin/conda config --system --set auto_update_conda false \
-    && $CONDA_DIR/bin/conda config --system --set show_channel_urls true \
-    && $CONDA_DIR/bin/conda update --json --all -yq \
-    && $CONDA_DIR/bin/conda env update --json -q -f "${CONDA_DIR}/${CONDA_ENV_YML}" \
-    && $CONDA_DIR/bin/conda clean --json -tipsy
+    && bash "./${CONDA_INSTALLER}" -u -b -p "${CONDA_DIR}" \
+    && ${CONDA_DIR}/bin/conda config --system --prepend channels conda-forge \
+    && ${CONDA_DIR}/bin/conda config --system --set auto_update_conda false \
+    && ${CONDA_DIR}/bin/conda config --system --set show_channel_urls true \
+    && ${CONDA_DIR}/bin/conda update --json --all -yq \
+    && ${CONDA_DIR}/bin/conda env update --json -q -f "${CONDA_DIR}/${CONDA_ENV_YML}" \
+    && ${CONDA_DIR}/bin/conda clean --json -tipsy \
+    && rm -rf /tmp/*
 
 COPY runit/service /var/lib/runit/service
 COPY runit/init.sh /sbin/init.sh

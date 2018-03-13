@@ -8,6 +8,7 @@ ARG NVIDIA_CUDA_TOOLS_GPG_KEY="7fa2af80"
 ARG NVIDIA_CUDNN_MAJOR_VERSION="7"
 ARG NVIDIA_CUDNN_PKG_VERSION="7.1.1.5-1+cuda9.0"
 ARG NVIDIA_DISTRO="ubuntu1604"
+ARG NVIDIA_NCCL_MAJOR_VERSION="2"
 ARG NVIDIA_NCCL_VERSION="2.1.2-1+cuda9.0"
 ARG NVIDIA_URL="http://developer.download.nvidia.com/compute"
 
@@ -19,7 +20,7 @@ LABEL com.nvidia.volumes.needed="nvidia_driver" \
       com.nvidia.cuda.version="${NVIDIA_CUDA_PKG_VERSION}" \
       com.nvidia.cudnn.version="${NVIDIA_CUDNN_VERSION}"
 
-# Need to unset LD_LIBRARY_PATH first so that libraries in /opt/mesosphere/libmesos-bundle lib don't interfere with apt
+# Need to unset LD_LIBRARY_PATH first so that libraries in ${MESOSPHERE_PREFIX}/libmesos-bundle/lib don't interfere with apt
 RUN unset LD_LIBRARY_PATH \
     && apt-key adv --keyserver "$GPG_KEYSERVER" --recv-keys "$NVIDIA_CUDA_TOOLS_GPG_KEY" \
     && echo "deb $NVIDIA_URL/cuda/repos/${NVIDIA_DISTRO}/x86_64 /" > /etc/apt/sources.list.d/nvidia-cuda.list \
@@ -29,8 +30,8 @@ RUN unset LD_LIBRARY_PATH \
        "cuda-cudart-${NVIDIA_CUDA_MAJOR_VERSION}=${NVIDIA_CUDA_PKG_VERSION}" \
        "cuda-libraries-${NVIDIA_CUDA_MAJOR_VERSION}=${NVIDIA_CUDA_PKG_VERSION}" \
        "cuda-libraries-dev-${NVIDIA_CUDA_MAJOR_VERSION}=${NVIDIA_CUDA_PKG_VERSION}" \
-       "libnccl2=${NVIDIA_NCCL_VERSION}" \
-       "libcudnn7=${NVIDIA_CUDNN_PKG_VERSION}" \
+       "libnccl${NVIDIA_NCCL_MAJOR_VERSION}=${NVIDIA_NCCL_VERSION}" \
+       "libcudnn${NVIDIA_CUDNN_MAJOR_VERSION}=${NVIDIA_CUDNN_PKG_VERSION}" \
     && cd /usr/local \
     && ln -s "cuda-${NVIDIA_CUDA_VERSION}" cuda \
     && cd cuda-"${NVIDIA_CUDA_VERSION}/targets/x86_64-linux/lib" \

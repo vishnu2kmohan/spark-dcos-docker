@@ -1,6 +1,6 @@
-# debian:9.3 - linux; amd64
-# https://github.com/docker-library/repo-info/blob/master/repos/debian/tag-details.md#debian93---linux-amd64
-FROM debian@sha256:02741df16aee1b81c4aaff4c48d75cc2c308bade918b22679df570c170feef7c
+# debian:9.4 - linux; amd64
+# https://github.com/docker-library/repo-info/blob/master/repos/debian/tag-details.md#debian94---linux-amd64
+FROM debian@sha256:316ebb92ca66bb8ddc79249fb29872bece4be384cb61b5344fac4e84ca4ed2b2
 
 ARG AWS_JAVA_SDK_JAR_SHA1="650f07e69b071cbf41c32d4ea35fd6bbba8e6793"
 ARG AWS_JAVA_SDK_URL="https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk"
@@ -28,9 +28,9 @@ ARG JAVA_VERSION="8u162"
 ARG LANG="en_US.UTF-8"
 ARG LANGUAGE="en_US.UTF-8"
 ARG LC_ALL="en_US.UTF-8"
-ARG LIBMESOS_BUNDLE_SHA256="875f6500101c7b219feebe05bd8ca68ea98682f974ca7f8efc14cb52790977b0"
+ARG LIBMESOS_BUNDLE_SHA256="bd4a785393f0477da7f012bf9624aa7dd65aa243c94d38ffe94adaa10de30274"
 ARG LIBMESOS_BUNDLE_URL="https://downloads.mesosphere.com/libmesos-bundle"
-ARG LIBMESOS_BUNDLE_VERSION="master-28f8827"
+ARG LIBMESOS_BUNDLE_VERSION="1.11.0"
 ARG MESOSPHERE_PREFIX="/opt/mesosphere"
 ARG MESOS_JAR_SHA1="0cef8031567f2ef367e8b6424a94d518e76fb8dc"
 ARG MESOS_MAVEN_URL="https://repo1.maven.org/maven2/org/apache/mesos/mesos"
@@ -39,7 +39,7 @@ ARG MESOS_VERSION="1.5.0"
 ARG REPO="http://cdn-fastly.deb.debian.org"
 ARG SPARK_DIST_URL="https://downloads.mesosphere.com/spark"
 ARG SPARK_HOME="/opt/spark"
-ARG SPARK_VERSION="2.2.1-2-beta"
+ARG SPARK_VERSION="2.2.1-2"
 ARG VCS_REF
 ARG VERSION="2.2.1-1.10.5"
 

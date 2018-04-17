@@ -46,7 +46,7 @@ ARG SPARK_DIST_URL="https://downloads.mesosphere.com/spark"
 ARG SPARK_HOME="/opt/spark"
 ARG SPARK_VERSION="2.2.1-2"
 ARG TENSORFLOW_SERVING_APT_URL="http://storage.googleapis.com/tensorflow-serving-apt"
-ARG TENSORFLOW_SERVING_VERSION="1.6.0"
+ARG TENSORFLOW_SERVING_VERSION="1.7.0"
 ARG VCS_REF
 ARG SPARK_DCOS_VERSION="2.2.1-1.11.0"
 

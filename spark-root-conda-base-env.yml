@@ -15,4 +15,4 @@ dependencies:
 - s3fs
 - xgboost
 - pip:
-  - tensorflow-gpu==1.7.0
+  - tensorflow==1.7.0

@@ -4,9 +4,9 @@ channels:
 - defaults
 dependencies:
 - awscli
-- bazel=0.11.1
-- findspark
-- grpcio=1.10.0
+- bazel
+- cython
+- grpcio
 - ipython
 - keras
 - libhdfs3
@@ -15,4 +15,6 @@ dependencies:
 - s3fs
 - xgboost
 - pip:
-  - tensorflow==1.7.0
+  - tensorflow==1.8.0
+  - tensorflow-hub
+  - tensorflowonspark==1.3.0

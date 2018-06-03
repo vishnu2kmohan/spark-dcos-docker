@@ -9,11 +9,11 @@ ARG BUILD_DATE
 ARG CODENAME="stretch"
 ARG CONDA_DIR="/opt/conda"
 ARG CONDA_ENV_YML="spark-root-conda-base-env.yml"
-ARG CONDA_INSTALLER="Miniconda3-4.3.31-Linux-x86_64.sh"
-ARG CONDA_MD5="7fe70b214bee1143e3e3f0467b71453c"
+ARG CONDA_INSTALLER="Miniconda3-4.5.1-Linux-x86_64.sh"
+ARG CONDA_MD5="0c28787e3126238df24c5d4858bd0744"
 ARG CONDA_URL="https://repo.continuum.io/miniconda"
 ARG DCOS_COMMONS_URL="https://downloads.mesosphere.com/dcos-commons"
-ARG DCOS_COMMONS_VERSION="0.41.0"
+ARG DCOS_COMMONS_VERSION="0.42.1"
 ARG DISTRO="debian"
 ARG DEBCONF_NONINTERACTIVE_SEEN="true"
 ARG DEBIAN_FRONTEND="noninteractive"
@@ -111,13 +111,16 @@ RUN echo "deb ${REPO}/${DISTRO} ${CODENAME} main" \
        ca-certificates \
        curl \
        dirmngr \
+       dnsutils \
        git \
        gnupg \
        jq \
        less \
+       netcat \
        nginx \
        openssh-client \
        procps \
+       psmisc \
        r-base \
        rsync \
        runit \
@@ -128,10 +131,10 @@ RUN echo "deb ${REPO}/${DISTRO} ${CODENAME} main" \
        wget \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && usermod -u 99 nobody \
     && addgroup --gid 99 nobody \
-    && usermod -g nobody nobody \
-    && echo "nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin" >> /etc/passwd
+    && usermod -u 99 -g 99 nobody \
+    && echo "nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin" >> /etc/passwd \
+    && usermod -a -G users nobody
 
 RUN cd /tmp \
     && mkdir -p "${CONDA_DIR}" "${HADOOP_HDFS_HOME}" "${JAVA_HOME}" "${MESOSPHERE_PREFIX}/bin" "${SPARK_HOME}" \
@@ -197,8 +200,9 @@ RUN cd /tmp \
     && ${CONDA_DIR}/bin/conda update --json --all -yq \
     && ${CONDA_DIR}/bin/pip install --upgrade pip \
     && ${CONDA_DIR}/bin/conda env update --json -q -f "${CONDA_DIR}/${CONDA_ENV_YML}" \
-    && ${CONDA_DIR}/bin/conda clean --json -tipsy \
+    && ${CONDA_DIR}/bin/conda remove --force --json -yq openjdk \
     && rm -rf "${HOME}/.cache/pip" "${HOME}/.cache/yarn" "${HOME}/.node-gyp" \
+    && ${CONDA_DIR}/bin/conda clean --json -tipsy \
     && rm -rf /tmp/*
 
 COPY runit/service /var/lib/runit/service

@@ -1,4 +1,4 @@
-FROM vishnumohan/spark-dcos:tfos
+FROM vishnumohan/spark-dcos
 
 ARG CONDA_ENV_YML="spark-root-conda-cudnn-env.yml"
 ARG NVIDIA_CUDA_MAJOR_VERSION="9-0"

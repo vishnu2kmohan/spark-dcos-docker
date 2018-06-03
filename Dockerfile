@@ -9,11 +9,11 @@ ARG BUILD_DATE
 ARG CODENAME="stretch"
 ARG CONDA_DIR="/opt/conda"
 ARG CONDA_ENV_YML="spark-root-conda-base-env.yml"
-ARG CONDA_INSTALLER="Miniconda3-4.3.31-Linux-x86_64.sh"
-ARG CONDA_MD5="7fe70b214bee1143e3e3f0467b71453c"
+ARG CONDA_INSTALLER="Miniconda3-4.5.1-Linux-x86_64.sh"
+ARG CONDA_MD5="0c28787e3126238df24c5d4858bd0744"
 ARG CONDA_URL="https://repo.continuum.io/miniconda"
 ARG DCOS_COMMONS_URL="https://downloads.mesosphere.com/dcos-commons"
-ARG DCOS_COMMONS_VERSION="0.41.0"
+ARG DCOS_COMMONS_VERSION="0.42.1"
 ARG DISTRO="debian"
 ARG DEBCONF_NONINTERACTIVE_SEEN="true"
 ARG DEBIAN_FRONTEND="noninteractive"
@@ -46,8 +46,16 @@ ARG SPARK_DCOS_VERSION="2.2.1-1.11.0"
 ARG SPARK_DIST_URL="https://downloads.mesosphere.com/spark"
 ARG SPARK_HOME="/opt/spark"
 ARG SPARK_VERSION="2.2.1-2"
+ARG TENSORFLOW_ECO_URL="https://s3.amazonaws.com/vishnu-mohan/tensorflow"
+ARG TENSORFLOW_HADOOP_JAR_SHA256="6a0399f315d79ed5f12546a3cced0968067486268af5c8b12389ebac5449118c"
+ARG TENSORFLOW_SPARK_JAR_SHA256="5b45a37b2b401528a51ef19247a304009d5c94cf210fb319c597bf331a798246"
+ARG TENSORFLOW_JAR_SHA256="4b6a9d76ea853db41532275a3608d2d1b5abc1c16609cf8b9ebfffef7c3036fc"
+ARG TENSORFLOW_JNI_SHA256="894d39d8e1d8d1329ea7153f8624657d27619c5db1d9535ab6b66296e3e6ee45"
 ARG TENSORFLOW_SERVING_APT_URL="http://storage.googleapis.com/tensorflow-serving-apt"
 ARG TENSORFLOW_SERVING_VERSION="1.5.0"
+ARG TENSORFLOW_URL="https://storage.googleapis.com/tensorflow"
+ARG TENSORFLOW_VARIANT="cpu"
+ARG TENSORFLOW_VERSION="1.8.0"
 ARG VCS_REF
 ARG XGBOOST_JAVA_JAR_SHA256="4a6599ee3f1bd10d984e8b03747d5bc3cb637aeb791474178de2c285857bf69e"
 ARG XGBOOST_SPARK_JAR_SHA256="cd31fb96b26fee197e126215949bc4f5c9a3cafd7ff157ab0037a63777c2935e"
@@ -83,7 +91,7 @@ ENV BOOTSTRAP="${MESOSPHERE_PREFIX}/bin/bootstrap" \
     MESOS_MODULES="{\"libraries\": [{\"file\": \"libdcos_security.so\", \"modules\": [{\"name\": \"com_mesosphere_dcos_ClassicRPCAuthenticatee\"}]}]}" \
     MESOS_NATIVE_LIBRARY="${MESOSPHERE_PREFIX}/libmesos-bundle/lib/libmesos.so" \
     MESOS_NATIVE_JAVA_LIBRARY="${MESOSPHERE_PREFIX}/libmesos-bundle/lib/libmesos.so" \
-    PATH="${JAVA_HOME}/bin:${SPARK_HOME}/bin:${CONDA_DIR}/bin:${MESOSPHERE_PREFIX}/bin:${PATH}" \
+    PATH="${JAVA_HOME}/bin:${SPARK_HOME}/bin:${HADOOP_HDFS_HOME}/bin:${CONDA_DIR}/bin:${MESOSPHERE_PREFIX}/bin:${PATH}" \
     SHELL="/bin/bash" \
     SPARK_HOME=${SPARK_HOME:-"/opt/spark"}
 
@@ -103,26 +111,30 @@ RUN echo "deb ${REPO}/${DISTRO} ${CODENAME} main" \
        ca-certificates \
        curl \
        dirmngr \
+       dnsutils \
        git \
        gnupg \
        jq \
        less \
+       netcat \
        nginx \
        openssh-client \
        procps \
+       psmisc \
        r-base \
        rsync \
        runit \
+       sssd \
        sudo \
        unzip \
        vim \
        wget \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && usermod -u 99 nobody \
     && addgroup --gid 99 nobody \
-    && usermod -g nobody nobody \
-    && echo "nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin" >> /etc/passwd
+    && usermod -u 99 -g 99 nobody \
+    && echo "nobody:x:65534:65534:nobody:/nonexistent:/usr/sbin/nologin" >> /etc/passwd \
+    && usermod -a -G users nobody
 
 RUN cd /tmp \
     && mkdir -p "${CONDA_DIR}" "${HADOOP_HDFS_HOME}" "${JAVA_HOME}" "${MESOSPHERE_PREFIX}/bin" "${SPARK_HOME}" \
@@ -153,6 +165,17 @@ RUN cd /tmp \
     && echo "${XGBOOST_JAVA_JAR_SHA256}" "xgboost4j-${XGBOOST_VERSION}.jar" | sha256sum -c - \
     && curl --retry 3 -fsSL -O "${XGBOOST_URL}/${XGBOOST_VERSION}/xgboost4j-spark-${XGBOOST_VERSION}.jar" \
     && echo "${XGBOOST_SPARK_JAR_SHA256}" "xgboost4j-spark-${XGBOOST_VERSION}.jar" | sha256sum -c - \
+    && curl --retry 3 -fsSL -O "${TENSORFLOW_URL}/libtensorflow/libtensorflow-${TENSORFLOW_VERSION}.jar" \
+    && echo "${TENSORFLOW_JAR_SHA256}" "libtensorflow-${TENSORFLOW_VERSION}.jar" | sha256sum -c - \
+    && curl --retry 3 -fsSL -O "${TENSORFLOW_ECO_URL}/${TENSORFLOW_VERSION}/tensorflow-hadoop-${TENSORFLOW_VERSION}.jar" \
+    && echo "${TENSORFLOW_HADOOP_JAR_SHA256}" "tensorflow-hadoop-${TENSORFLOW_VERSION}.jar" | sha256sum -c - \
+    && curl --retry 3 -fsSL -O "${TENSORFLOW_ECO_URL}/${TENSORFLOW_VERSION}/spark-tensorflow-connector_2.11-${TENSORFLOW_VERSION}.jar" \
+    && echo "${TENSORFLOW_SPARK_JAR_SHA256}" "spark-tensorflow-connector_2.11-${TENSORFLOW_VERSION}.jar" | sha256sum -c - \
+    && cd /tmp \
+    && curl --retry 3 -fsSL -O "${TENSORFLOW_URL}/libtensorflow/libtensorflow_jni-${TENSORFLOW_VARIANT}-linux-x86_64-${TENSORFLOW_VERSION}.tar.gz" \
+    && echo "${TENSORFLOW_JNI_SHA256}" "libtensorflow_jni-${TENSORFLOW_VARIANT}-linux-x86_64-${TENSORFLOW_VERSION}.tar.gz" | sha256sum -c - \
+    && tar xf "libtensorflow_jni-${TENSORFLOW_VARIANT}-linux-x86_64-${TENSORFLOW_VERSION}.tar.gz" "./libtensorflow_jni.so" \
+    && mv "libtensorflow_jni.so" "/usr/lib" \
     && rm -rf /tmp/*
 
 RUN echo "deb [arch=amd64] ${TENSORFLOW_SERVING_APT_URL} stable tensorflow-model-server tensorflow-model-server-universal" > /etc/apt/sources.list.d/tensorflow-serving.list \
@@ -175,9 +198,11 @@ RUN cd /tmp \
     && ${CONDA_DIR}/bin/conda config --system --set auto_update_conda false \
     && ${CONDA_DIR}/bin/conda config --system --set show_channel_urls true \
     && ${CONDA_DIR}/bin/conda update --json --all -yq \
+    && ${CONDA_DIR}/bin/pip install --upgrade pip \
     && ${CONDA_DIR}/bin/conda env update --json -q -f "${CONDA_DIR}/${CONDA_ENV_YML}" \
-    && ${CONDA_DIR}/bin/conda clean --json -tipsy \
+    && ${CONDA_DIR}/bin/conda remove --force --json -yq openjdk \
     && rm -rf "${HOME}/.cache/pip" "${HOME}/.cache/yarn" "${HOME}/.node-gyp" \
+    && ${CONDA_DIR}/bin/conda clean --json -tipsy \
     && rm -rf /tmp/*
 
 COPY runit/service /var/lib/runit/service
@@ -206,6 +231,7 @@ RUN mkdir -p /var/lib/nginx \
 RUN mv /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0 /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0.bak \
     && cp "${MESOSPHERE_PREFIX}/libmesos-bundle/lib/libcurl.so.4" /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0
 
-ENV LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:${MESOSPHERE_PREFIX}/libmesos-bundle/lib:${JAVA_HOME}/jre/lib/amd64/server"
+ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.4-src.zip:${PYTHONPATH}" \
+    LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:${MESOSPHERE_PREFIX}/libmesos-bundle/lib:${JAVA_HOME}/jre/lib/amd64/server"
 
 WORKDIR "${SPARK_HOME}"

@@ -20,14 +20,14 @@
     "AWS_SECRET_ACCESS_KEY": {
       "secret": "secret1"
     },
-    "SPARK_HISTORY_OPTS": "-Dspark.history.fs.cleaner.enabled=false -Dspark.history.fs.cleaner.interval=1d -Dspark.history.fs.cleaner.maxAge=7d"
+    "SPARK_HISTORY_OPTS": "-Dspark.history.fs.cleaner.enabled=true -Dspark.history.fs.cleaner.interval=1d -Dspark.history.fs.cleaner.maxAge=7d"
   },
   "secrets": {
     "secret0": {
-      "source": "/dev/spark/AWS_ACCESS_KEY_ID"
+      "source": "/dev/AWS_ACCESS_KEY_ID"
     },
     "secret1": {
-      "source": "/dev/spark/AWS_SECRET_ACCESS_KEY"
+      "source": "/dev/AWS_SECRET_ACCESS_KEY"
     }
   },
   "labels": {
@@ -38,7 +38,7 @@
     "DCOS_PACKAGE_RELEASE": "0",
     "DCOS_PACKAGE_SOURCE": "https://universe.mesosphere.com/repo",
     "DCOS_PACKAGE_VERSION": "2.1.0-2.2.1-1",
-    "DCOS_SERVICE_NAME": "dev/spark/history",
+    "DCOS_SERVICE_NAME": "/dev/spark/history",
     "DCOS_SERVICE_PORT_INDEX": "0",
     "DCOS_SERVICE_SCHEME": "http",
     "MARATHON_SINGLE_INSTANCE_APP": "true"

@@ -2,30 +2,24 @@
 # https://github.com/docker-library/repo-info/blob/master/repos/debian/tag-details.md#debian94---linux-amd64
 FROM debian@sha256:316ebb92ca66bb8ddc79249fb29872bece4be384cb61b5344fac4e84ca4ed2b2
 
-ARG AWS_JAVA_SDK_JAR_SHA1="650f07e69b071cbf41c32d4ea35fd6bbba8e6793"
-ARG AWS_JAVA_SDK_URL="https://repo1.maven.org/maven2/com/amazonaws/aws-java-sdk"
-ARG AWS_JAVA_SDK_VERSION="1.7.5"
 ARG BUILD_DATE
 ARG CODENAME="stretch"
 ARG CONDA_DIR="/opt/conda"
 ARG CONDA_ENV_YML="spark-root-conda-base-env.yml"
-ARG CONDA_INSTALLER="Miniconda3-4.5.1-Linux-x86_64.sh"
-ARG CONDA_MD5="0c28787e3126238df24c5d4858bd0744"
+ARG CONDA_INSTALLER="Miniconda3-4.5.4-Linux-x86_64.sh"
+ARG CONDA_MD5="a946ea1d0c4a642ddf0c3a26a18bb16d"
 ARG CONDA_URL="https://repo.continuum.io/miniconda"
 ARG DCOS_COMMONS_URL="https://downloads.mesosphere.com/dcos-commons"
-ARG DCOS_COMMONS_VERSION="0.42.1"
+ARG DCOS_COMMONS_VERSION="0.50.0"
 ARG DISTRO="debian"
 ARG DEBCONF_NONINTERACTIVE_SEEN="true"
 ARG DEBIAN_FRONTEND="noninteractive"
 ARG GPG_KEYSERVER="hkps://zimmermann.mayfirst.org"
-ARG HADOOP_AWS_JAR_SHA1="d997f4cf765ca360b69c8bbcaab8785e7c37a55d"
-ARG HADOOP_AWS_URL="https://repo1.maven.org/maven2/org/apache/hadoop/hadoop-aws"
-ARG HADOOP_AWS_VERSION="2.7.6"
 ARG HADOOP_HDFS_HOME="/opt/hadoop"
-ARG HADOOP_MAJOR_VERSION="2.7"
-ARG HADOOP_SHA256="f2327ea93f4bc5a5d7150dee8e0ede196d3a77ff8526a7dd05a48a09aae25669"
+ARG HADOOP_MAJOR_VERSION="2.9"
+ARG HADOOP_SHA256="eed6015a123644d3b4247bac58770e4a8b31340fa62721987430e15a0dd942fc"
 ARG HADOOP_URL="http://www-us.apache.org/dist/hadoop/common"
-ARG HADOOP_VERSION="2.7.6"
+ARG HADOOP_VERSION="2.9.1"
 ARG HOME="/root"
 ARG JAVA_HOME="/opt/jdk"
 ARG JAVA_URL="https://downloads.mesosphere.com/java"
@@ -41,11 +35,12 @@ ARG MESOS_JAR_SHA1="0cef8031567f2ef367e8b6424a94d518e76fb8dc"
 ARG MESOS_MAVEN_URL="https://repo1.maven.org/maven2/org/apache/mesos/mesos"
 ARG MESOS_PROTOBUF_JAR_SHA1="189ef74959049521be8f5a1c3de3921eb0117ffb"
 ARG MESOS_VERSION="1.5.0"
-ARG REPO="http://cdn-fastly.deb.debian.org"
+ARG DEBIAN_REPO="http://cdn-fastly.deb.debian.org"
 ARG SPARK_DCOS_VERSION="2.2.1-1.11.0"
-ARG SPARK_DIST_URL="https://downloads.mesosphere.com/spark"
+ARG SPARK_DIST_SHA256="52e29e83a65688e29da975d1ace7815c6a5b55e76c41d43a28e5e80de2b29843"
+ARG SPARK_DIST_URL="https://s3.amazonaws.com/vishnu-mohan/spark"
 ARG SPARK_HOME="/opt/spark"
-ARG SPARK_VERSION="2.2.1-2"
+ARG SPARK_VERSION="2.2.1"
 ARG TENSORFLOW_ECO_URL="https://s3.amazonaws.com/vishnu-mohan/tensorflow"
 ARG TENSORFLOW_HADOOP_JAR_SHA256="6a0399f315d79ed5f12546a3cced0968067486268af5c8b12389ebac5449118c"
 ARG TENSORFLOW_SPARK_JAR_SHA256="5b45a37b2b401528a51ef19247a304009d5c94cf210fb319c597bf331a798246"
@@ -95,10 +90,8 @@ ENV BOOTSTRAP="${MESOSPHERE_PREFIX}/bin/bootstrap" \
     SHELL="/bin/bash" \
     SPARK_HOME=${SPARK_HOME:-"/opt/spark"}
 
-RUN echo "deb ${REPO}/${DISTRO} ${CODENAME} main" \
-         >> /etc/apt/sources.list \
-    echo "deb ${REPO}/${DISTRO}-security ${CODENAME}/updates main" \
-         >> /etc/apt/sources.list \
+RUN echo "deb ${DEBIAN_REPO}/${DISTRO} ${CODENAME} main" >> /etc/apt/sources.list \
+    && echo "deb ${DEBIAN_REPO}/${DISTRO}-security ${CODENAME}/updates main" >> /etc/apt/sources.list \
     && apt-get update -yq --fix-missing \
     && apt-get install -yq --no-install-recommends locales \
     && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
@@ -155,13 +148,11 @@ RUN cd /tmp \
     && curl --retry 3 -fsSL -O "${HADOOP_URL}/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz" \
     && echo "${HADOOP_SHA256}" "hadoop-${HADOOP_VERSION}.tar.gz" | sha256sum -c - \
     && tar xf "hadoop-${HADOOP_VERSION}.tar.gz" -C "${HADOOP_HDFS_HOME}" --strip-components=1 \
-    && curl --retry 3 -fsSL -O "${SPARK_DIST_URL}/assets/spark-${SPARK_VERSION}-bin-${HADOOP_MAJOR_VERSION}.tgz" \
-    && tar xf "spark-${SPARK_VERSION}-bin-${HADOOP_MAJOR_VERSION}.tgz" -C "${SPARK_HOME}" --strip-components=1 \
+    && rm -rf "${HADOOP_HDFS_HOME}/share/doc" \
+    && curl --retry 3 -fsSL -O "${SPARK_DIST_URL}/spark-${SPARK_VERSION}-bin.tgz" \
+    && echo "${SPARK_DIST_SHA256}" "spark-${SPARK_VERSION}-bin.tgz" | sha256sum -c - \
+    && tar xf "spark-${SPARK_VERSION}-bin.tgz" -C "${SPARK_HOME}" --strip-components=1 \
     && cd "${SPARK_HOME}/jars" \
-    && curl --retry 3 -fsSL -O "${AWS_JAVA_SDK_URL}/${AWS_JAVA_SDK_VERSION}/aws-java-sdk-${AWS_JAVA_SDK_VERSION}.jar" \
-    && echo "${AWS_JAVA_SDK_JAR_SHA1} aws-java-sdk-${AWS_JAVA_SDK_VERSION}.jar" | sha1sum -c - \
-    && curl --retry 3 -fsSL -O "${HADOOP_AWS_URL}/${HADOOP_AWS_VERSION}/hadoop-aws-${HADOOP_AWS_VERSION}.jar" \
-    && echo "${HADOOP_AWS_JAR_SHA1} hadoop-aws-${HADOOP_AWS_VERSION}.jar" | sha1sum -c - \
     && curl --retry 3 -fsSL -O "${XGBOOST_URL}/${XGBOOST_VERSION}/xgboost4j-${XGBOOST_VERSION}.jar" \
     && echo "${XGBOOST_JAVA_JAR_SHA256}" "xgboost4j-${XGBOOST_VERSION}.jar" | sha256sum -c - \
     && curl --retry 3 -fsSL -O "${XGBOOST_URL}/${XGBOOST_VERSION}/xgboost4j-spark-${XGBOOST_VERSION}.jar" \
@@ -201,20 +192,33 @@ RUN cd /tmp \
     && ${CONDA_DIR}/bin/conda update --json --all -yq \
     && ${CONDA_DIR}/bin/pip install --upgrade pip \
     && ${CONDA_DIR}/bin/conda env update --json -q -f "${CONDA_DIR}/${CONDA_ENV_YML}" \
-    && ${CONDA_DIR}/bin/conda remove --force --json -yq openjdk \
+    && ${CONDA_DIR}/bin/conda remove --force --json -yq openjdk pyqt qt \
     && rm -rf "${HOME}/.cache/pip" "${HOME}/.cache/yarn" "${HOME}/.node-gyp" \
     && ${CONDA_DIR}/bin/conda clean --json -tipsy \
     && rm -rf /tmp/*
+
+COPY profile "/root/.profile"
+COPY bash_profile "/root/.bash_profile"
+COPY bashrc "/root/.bashrc"
+COPY dircolors "/root/.dircolors"
+
+RUN mv /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0 /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0.bak \
+    && cp "${MESOSPHERE_PREFIX}/libmesos-bundle/lib/libcurl.so.4" /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0
+
+ENV SPARK_DIST_CLASSPATH="${HADOOP_HDFS_HOME}/etc/hadoop:${HADOOP_HDFS_HOME}/share/hadoop/common/lib/*:${HADOOP_HDFS_HOME}/share/hadoop/common/*:${HADOOP_HDFS_HOME}/share/hadoop/hdfs:${HADOOP_HDFS_HOME}/share/hadoop/hdfs/lib/*:${HADOOP_HDFS_HOME}/share/hadoop/hdfs/*:${HADOOP_HDFS_HOME}/share/hadoop/yarn:${HADOOP_HDFS_HOME}/share/hadoop/yarn/lib/*:${HADOOP_HDFS_HOME}/share/hadoop/yarn/*:${HADOOP_HDFS_HOME}/share/hadoop/mapreduce/lib/*:${HADOOP_HDFS_HOME}/share/hadoop/mapreduce/*:${HADOOP_HDFS_HOME}/share/hadoop/tools/lib/*" \
+    HADOOP_CLASSPATH="${HADOOP_CLASSPATH}:${HADOOP_HDFS_HOME}/share/hadoop/tools/lib/*" \
+    PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.4-src.zip:${PYTHONPATH}" \
+    LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:${MESOSPHERE_PREFIX}/libmesos-bundle/lib:${JAVA_HOME}/jre/lib/amd64/server"
+
+WORKDIR "${SPARK_HOME}"
 
 COPY runit/service /var/lib/runit/service
 COPY runit/init.sh /sbin/init.sh
 COPY nginx /etc/nginx
 COPY krb5.conf.mustache /etc/
+COPY hadoop-env.sh "${HADOOP_HDFS_HOME}/etc/hadoop/"
+COPY hadooprc "${HOME}/.hadooprc"
 COPY conf/ "${SPARK_HOME}/conf/"
-COPY profile "/root/.profile"
-COPY bash_profile "/root/.bash_profile"
-COPY bashrc "/root/.bashrc"
-COPY dircolors "/root/.dircolors"
 
 RUN mkdir -p /var/lib/nginx \
     && ln -s /var/lib/runit/service/spark /etc/service/spark \
@@ -229,10 +233,5 @@ RUN mkdir -p /var/lib/nginx \
     && cp "${CONDA_DIR}/share/examples/krb5/krb5.conf" /etc \
     && chmod ugo+rw /etc/krb5.conf
 
-RUN mv /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0 /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0.bak \
-    && cp "${MESOSPHERE_PREFIX}/libmesos-bundle/lib/libcurl.so.4" /usr/lib/x86_64-linux-gnu/libcurl.so.4.4.0
-
-ENV PYTHONPATH="${SPARK_HOME}/python:${SPARK_HOME}/python/lib/py4j-0.10.4-src.zip:${PYTHONPATH}" \
-    LD_LIBRARY_PATH="/usr/lib/x86_64-linux-gnu:${MESOSPHERE_PREFIX}/libmesos-bundle/lib:${JAVA_HOME}/jre/lib/amd64/server"
-
-WORKDIR "${SPARK_HOME}"
+# Patch TensorFlowOnSpark to handle all Hadoop 3.x supported Filesystem URIs
+COPY TFNode.py "${CONDA_DIR}/lib/python3.6/site-packages/tensorflowonspark/"

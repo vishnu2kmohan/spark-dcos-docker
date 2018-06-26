@@ -10,9 +10,14 @@ dependencies:
 - ipython
 - keras
 - libhdfs3
+- matplotlib
 - pandas
+- pillow
 - pyarrow
+- r-base
 - s3fs
+- scikit-learn
+- scipy
 - xgboost
 - pip:
   - tensorflow==1.8.0

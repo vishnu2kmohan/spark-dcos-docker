@@ -27,6 +27,7 @@ export SPARK_DIST_CLASSPATH=$(${HADOOP_HDFS_HOME}/bin/hadoop classpath):${HADOOP
 if [ -d "${MESOS_SANDBOX}" ] ; then
     cd "${MESOS_SANDBOX}" || exit
     MESOSPHERE_PREFIX=${MESOSPHERE_PREFIX:-"/opt/mesosphere"}
+    export MESOSPHERE_PREFIX
     export BOOTSTRAP=${MESOSPHERE_PREFIX}/bin/bootstrap
     export HADOOP_CONF_DIR=${MESOS_SANDBOX}
     export HIVE_CONF_DIR=${MESOS_SANDBOX}

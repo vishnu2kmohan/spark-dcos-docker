@@ -11,9 +11,10 @@ ARG CONDA_MD5="a946ea1d0c4a642ddf0c3a26a18bb16d"
 ARG CONDA_URL="https://repo.continuum.io/miniconda"
 ARG DCOS_COMMONS_URL="https://downloads.mesosphere.com/dcos-commons"
 ARG DCOS_COMMONS_VERSION="0.50.0"
-ARG DISTRO="debian"
 ARG DEBCONF_NONINTERACTIVE_SEEN="true"
 ARG DEBIAN_FRONTEND="noninteractive"
+ARG DEBIAN_REPO="http://cdn-fastly.deb.debian.org"
+ARG DISTRO="debian"
 ARG GPG_KEYSERVER="hkps://zimmermann.mayfirst.org"
 ARG HADOOP_HDFS_HOME="/opt/hadoop"
 ARG HADOOP_MAJOR_VERSION="2.9"
@@ -35,7 +36,6 @@ ARG MESOS_JAR_SHA1="0cef8031567f2ef367e8b6424a94d518e76fb8dc"
 ARG MESOS_MAVEN_URL="https://repo1.maven.org/maven2/org/apache/mesos/mesos"
 ARG MESOS_PROTOBUF_JAR_SHA1="189ef74959049521be8f5a1c3de3921eb0117ffb"
 ARG MESOS_VERSION="1.5.0"
-ARG DEBIAN_REPO="http://cdn-fastly.deb.debian.org"
 ARG SPARK_DCOS_VERSION="2.2.1-1.11.3"
 ARG SPARK_DIST_SHA256="52e29e83a65688e29da975d1ace7815c6a5b55e76c41d43a28e5e80de2b29843"
 ARG SPARK_DIST_URL="https://s3.amazonaws.com/vishnu-mohan/spark"
@@ -97,7 +97,7 @@ RUN echo "deb ${DEBIAN_REPO}/${DISTRO} ${CODENAME} main" >> /etc/apt/sources.lis
     && apt-get install -yq --no-install-recommends locales \
     && echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
     && locale-gen \
-    && apt-get install -yq --no-install-recommends apt-utils \
+    && apt-get install -yq --no-install-recommends apt-transport-https apt-utils \
     && apt-get -yq dist-upgrade \
     && apt-get install -yq --no-install-recommends \
        bash-completion \
@@ -186,12 +186,13 @@ RUN cd /tmp \
     && curl --retry 3 -fsSL -O "${CONDA_URL}/${CONDA_INSTALLER}" \
     && echo "${CONDA_MD5}  ${CONDA_INSTALLER}" | md5sum -c - \
     && bash "./${CONDA_INSTALLER}" -u -b -p "${CONDA_DIR}" \
+    && ${CONDA_DIR}/bin/conda update --json --all -yq \
     && ${CONDA_DIR}/bin/conda config --system --prepend channels conda-forge \
     && ${CONDA_DIR}/bin/conda config --system --set auto_update_conda false \
     && ${CONDA_DIR}/bin/conda config --system --set show_channel_urls true \
-    && ${CONDA_DIR}/bin/conda update --json --all -yq \
     && ${CONDA_DIR}/bin/pip install --upgrade pip \
     && ${CONDA_DIR}/bin/conda env update --json -q -f "${CONDA_DIR}/${CONDA_ENV_YML}" \
+    && ${CONDA_DIR}/bin/pip install --upgrade pip \
     && ${CONDA_DIR}/bin/conda remove --force --json -yq openjdk pyqt qt \
     && rm -rf "${HOME}/.cache/pip" "${HOME}/.cache/yarn" "${HOME}/.node-gyp" \
     && ${CONDA_DIR}/bin/conda clean --json -tipsy \

@@ -14,7 +14,7 @@ dependencies:
 - pandas
 - pillow
 - pyarrow
-- python=3.5.*
+- python=3.6.*
 - r-base
 - s3fs
 - scikit-learn

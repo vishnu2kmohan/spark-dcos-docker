@@ -5,4 +5,4 @@ channels:
 dependencies:
 - numba
 - pip:
-  - tensorflow-gpu==1.8.0
+  - tensorflow-gpu==1.9.0
